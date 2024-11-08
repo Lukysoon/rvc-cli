@@ -60,7 +60,7 @@ def run_train(model_name, total_epoch):
 def run_pipeline(model_name, cpu_cores, total_epoch):
     print("Starting RVC pipeline...")
 
-    if os.path.exists("venv"):
+    if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
     
     print("\n1. Running preprocessing...")

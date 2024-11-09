@@ -24,11 +24,11 @@ def run_command(command):
 
 
 # Preprocess command
-def run_preprocess(model_name):
+def run_preprocess(model_name, datasets):
     cmd = (
         f"venv/bin/python3 rvc_cli.py preprocess "
         f"--model_name {model_name} "
-        f"--dataset_path dataset "
+        f"--dataset_path {datasets} "
         f"--sample_rate 48000 "
         f"--cut_preprocess True "
     )
@@ -57,14 +57,14 @@ def run_train(model_name, total_epoch):
     return run_command(cmd)
 
 # Run all steps
-def run_pipeline(model_name, cpu_cores, total_epoch):
+def run_pipeline(model_name, datasets, cpu_cores, total_epoch):
     print("Starting RVC pipeline...")
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
     
     print("\n1. Running preprocessing...")
-    if not run_preprocess(model_name):
+    if not run_preprocess(model_name, datasets):
         return
     
     print("\n2. Running feature extraction...")

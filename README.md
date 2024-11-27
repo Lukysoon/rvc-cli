@@ -1,35 +1,18 @@
-## 🚀 RVC + UVR = A perfect set of tools for voice cloning, easily and free!
 
-[![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/iahispano/applio/blob/master/assets/Applio_NoUI.ipynb)
-
-> [!NOTE]  
-> Issues are not handled in this repository due to time constraints. For questions or discussions, feel free to join [AI Hispano on Discord](https://discord.gg/iahispano). If you're experiencing a technical issue, please report it on [Applio's Issues page](https://github.com/IAHispano/Applio/issues) and specify that the problem occurs via CLI.
-
-### Installation
-
-Ensure that you have the necessary Python packages installed by following these steps (Python 3.9 is recommended):
-
-#### Windows
-
-Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python.exe cli.py` instead of the conventional `python cli.py` command.
-
-#### Linux
-
-```bash
-chmod +x install.sh
-./install.sh
-```
 
 ### Getting Started
 
-For detailed information and command-line options, refer to the help command:
+- Deploy pod with teplate RunPod Pytorch 2.1
+- Run this command in console: git clone  https://github.com/Lukysoon/rvc-cli.git
+- run these commands: 
+  cd rvc-cli
+  chmod +x install.sh
+  ./install.sh
+  
+Open the jupyter notebook and run both cells. If you want to run multiple training series, that copy the second cell and change values. 
 
-```bash
-python rvc_cli.py -h
-python uvr_cli.py -h
-```
-
-This command provides a clear overview of the available modes and their corresponding parameters, facilitating effective utilization of the RVC CLI, but if you need more information, you can check the [documentation](https://rvc-cli.pages.dev/).
+### Official documentation
+[documentation](https://rvc-cli.pages.dev/).
 
 ### References
 

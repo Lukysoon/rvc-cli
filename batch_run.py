@@ -98,7 +98,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
     
     rvc_version = "v2"
     sample_rate = 48000
-    save_only_latest = True
+    save_only_latest = False
     save_every_weights = True
     gpu = 0
     pitch_guidance = True

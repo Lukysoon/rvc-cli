@@ -28,3 +28,4 @@ node_modules
 # Ignore specific project directories
 /tracks/
 /lyrics/
+/datasets/*

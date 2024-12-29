@@ -23,10 +23,19 @@ from rvc.train.extract.preparing_files import generate_config, generate_filelist
 from rvc.lib.predictors.RMVPE import RMVPE0Predictor
 from rvc.configs.config import Config
 
+import logging
+
 # Load config
 config = Config()
 
 mp.set_start_method("spawn", force=True)
+
+experiment_dir = str(sys.argv[1])
+logging.basicConfig(filename=experiment_dir,
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.INFO)
 
 
 class FeatureInput:
@@ -105,7 +114,7 @@ class FeatureInput:
             coarse_pit = self.coarse_f0(feature_pit)
             np.save(opt_path1, coarse_pit, allow_pickle=False)
         except Exception as error:
-            print(
+            logging.info(
                 f"An error occurred extracting file {inp_path} on {self.device}: {error}"
             )
 
@@ -143,7 +152,7 @@ class FeatureInput:
 
 def run_pitch_extraction(files, devices, f0_method, hop_length, num_processes):
     devices_str = ", ".join(devices)
-    print(
+    logging.info(
         f"Starting pitch extraction with {num_processes} cores on {devices_str} using {f0_method}..."
     )
     start_time = time.time()
@@ -169,7 +178,7 @@ def run_pitch_extraction(files, devices, f0_method, hop_length, num_processes):
         ps[i].join()
 
     elapsed_time = time.time() - start_time
-    print(f"Pitch extraction completed in {elapsed_time:.2f} seconds.")
+    logging.info(f"Pitch extraction completed in {elapsed_time:.2f} seconds.")
 
 
 def process_file_embedding(
@@ -194,7 +203,7 @@ def process_file_embedding(
         if not np.isnan(feats).any():
             np.save(out_file_path, feats, allow_pickle=False)
         else:
-            print(f"{file} contains NaN values and will be skipped.")
+            logging.info(f"{file} contains NaN values and will be skipped.")
 
     with tqdm.tqdm(total=len(files), leave=True, position=device_num) as pbar:
         # using multi-threading
@@ -212,7 +221,7 @@ def run_embedding_extraction(
 ):
     start_time = time.time()
     devices_str = ", ".join(devices)
-    print(
+    logging.info(
         f"Starting embedding extraction with {num_processes} cores on {devices_str}..."
     )
     # split the task between devices
@@ -236,7 +245,7 @@ def run_embedding_extraction(
     for i, device in enumerate(devices):
         ps[i].join()
     elapsed_time = time.time() - start_time
-    print(f"Embedding extraction completed in {elapsed_time:.2f} seconds.")
+    logging.info(f"Embedding extraction completed in {elapsed_time:.2f} seconds.")
 
 
 if __name__ == "__main__":

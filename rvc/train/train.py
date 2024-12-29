@@ -81,6 +81,13 @@ experiment_dir = os.path.join(current_dir, "logs", model_name)
 config_save_path = os.path.join(experiment_dir, "config.json")
 dataset_path = os.path.join(experiment_dir, "sliced_audios")
 
+experiment_dir = str(sys.argv[1])
+logging.basicConfig(filename=experiment_dir,
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.INFO)
+
 with open(config_save_path, "r") as f:
     config = json.load(f)
 config = HParams(**config)
@@ -134,7 +141,7 @@ def verify_checkpoint_shapes(checkpoint_path, model):
         else:
             model_state_dict = model.load_state_dict(checkpoint_state_dict)
     except RuntimeError:
-        print("The sample rate of the pretrain doesn't match the selected one")
+        logging.info("The sample rate of the pretrain doesn't match the selected one")
         sys.exit(1)
     else:
         del checkpoint
@@ -157,12 +164,12 @@ def main():
     if wavs:
         _, sr = load_wav_to_torch(wavs[0])
         if sr != sample_rate:
-            print(
+            logging.info(
                 f"Error: Pretrained model sample rate ({sample_rate} Hz) does not match dataset audio sample rate ({sr} Hz)."
             )
             os._exit(1)
     else:
-        print("No wav file found.")
+        logging.info("No wav file found.")
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -173,7 +180,7 @@ def main():
     else:
         device = torch.device("cpu")
         n_gpus = 1
-        print("Training with CPU, this will take a long time.")
+        logging.info("Training with CPU, this will take a long time.")
 
     def start():
         """
@@ -247,7 +254,7 @@ def main():
                 ) = load_from_json(training_file_path)
 
     if cleanup:
-        print("Removing files from the prior training attempt...")
+        logging.info("Removing files from the prior training attempt...")
 
         # Clean up unnecessary files
         for root, dirs, files in os.walk(
@@ -272,7 +279,7 @@ def main():
                             os.remove(item_path)
                     os.rmdir(folder_path)
 
-        print("Cleanup done!")
+        logging.info("Cleanup done!")
 
     continue_overtrain_detector(training_file_path)
     start()
@@ -384,7 +391,7 @@ def run(
 
     # Load checkpoint if available
     try:
-        print("Starting training...")
+        logging.info("Starting training...")
         _, _, _, epoch_str = load_checkpoint(
             latest_checkpoint_path(experiment_dir, "D_*.pth"), net_d, optim_d
         )
@@ -400,7 +407,7 @@ def run(
         if pretrainG != "":
             if rank == 0:
                 verify_checkpoint_shapes(pretrainG, net_g)
-                print(f"Loaded pretrained (G) '{pretrainG}'")
+                logging.info(f"Loaded pretrained (G) '{pretrainG}'")
             if hasattr(net_g, "module"):
                 net_g.module.load_state_dict(
                     torch.load(pretrainG, map_location="cpu")["model"]
@@ -412,7 +419,7 @@ def run(
 
         if pretrainD != "":
             if rank == 0:
-                print(f"Loaded pretrained (D) '{pretrainD}'")
+                logging.info(f"Loaded pretrained (D) '{pretrainD}'")
             if hasattr(net_d, "module"):
                 net_d.module.load_state_dict(
                     torch.load(pretrainD, map_location="cpu")["model"]
@@ -687,9 +694,9 @@ def train_and_evaluate(
                         lowest_value["value"] = loss_gen_all
                         lowest_value["step"] = global_step
                         lowest_value["epoch"] = epoch
-                        # print(f'Lowest generator loss updated: {lowest_value["value"]} at epoch {epoch}, step {global_step}')
+                        # logging.info(f'Lowest generator loss updated: {lowest_value["value"]} at epoch {epoch}, step {global_step}')
                         if epoch > lowest_value["epoch"]:
-                            print(
+                            logging.info(
                                 "Alert: The lower generating loss has been exceeded by a lower loss in a subsequent epoch."
                             )
 
@@ -826,12 +833,12 @@ def train_and_evaluate(
                 or is_overtraining_disc
                 and consecutive_increases_disc == overtraining_threshold * 2
             ):
-                print(
+                logging.info(
                     f"Overtraining detected at epoch {epoch} with smoothed loss_g {smoothed_value_gen:.3f} and loss_d {smoothed_value_disc:.3f}"
                 )
                 done = True
             else:
-                print(
+                logging.info(
                     f"New best epoch {epoch} with smoothed loss_g {smoothed_value_gen:.3f} and loss_d {smoothed_value_disc:.3f}"
                 )
                 old_model_files = glob.glob(
@@ -850,10 +857,10 @@ def train_and_evaluate(
         if epoch >= custom_total_epoch:
             lowest_value_rounded = float(lowest_value["value"])
             lowest_value_rounded = round(lowest_value_rounded, 3)
-            print(
+            logging.info(
                 f"Training has been successfully completed with {epoch} epoch, {global_step} steps and {round(loss_gen_all.item(), 3)} loss gen."
             )
-            print(
+            logging.info(
                 f"Lowest generator loss: {lowest_value_rounded} at epoch {lowest_value['epoch']}, step {lowest_value['step']}"
             )
 
@@ -896,7 +903,7 @@ def train_and_evaluate(
         for m in model_del:
             os.remove(m)
 
-        # Print training progress
+        # logging.info training progress
         lowest_value_rounded = float(lowest_value["value"])
         lowest_value_rounded = round(lowest_value_rounded, 3)
 
@@ -916,7 +923,7 @@ def train_and_evaluate(
                 record
                 + f" | Number of epochs remaining for overtraining: g/total: {remaining_epochs_gen} d/total: {remaining_epochs_disc} | smoothed_loss_gen={smoothed_value_gen:.3f} | smoothed_loss_disc={smoothed_value_disc:.3f}"
             )
-        print(record)
+        logging.info(record)
         last_loss_gen_all = loss_gen_all
 
         if done:

@@ -26,7 +26,7 @@ logging.getLogger("numba.core.ssa").setLevel(logging.WARNING)
 logging.getLogger("numba.core.interpreter").setLevel(logging.WARNING)
 
 experiment_dir = str(sys.argv[1])
-logging.basicConfig(filename=experiment_dir,
+logging.basicConfig(filename=os.path.join(experiment_dir, "experiment_logs.txt"),
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',

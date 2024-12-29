@@ -31,7 +31,7 @@ config = Config()
 mp.set_start_method("spawn", force=True)
 
 experiment_dir = str(sys.argv[1])
-logging.basicConfig(filename=experiment_dir,
+logging.basicConfig(filename=os.path.join(experiment_dir, "experiment_logs.txt"),
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',

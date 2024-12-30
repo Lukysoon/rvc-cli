@@ -52,7 +52,7 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
     return run_command(cmd)
 
 # Extract command
-def run_extract(model_name, cpu_cores, hop_size=128):
+def run_extract(model_name, cpu_cores, hop_size):
 
     rvc_version = "v2"
     f0_method = "rmvpe"

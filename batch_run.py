@@ -1,5 +1,6 @@
 import subprocess
 import os
+import logging
 
 def run_command(command):
 
@@ -13,7 +14,7 @@ def run_command(command):
             text=True
         )
         
-        print(process.stdout)
+        logging.info(process.stdout)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
@@ -168,6 +169,8 @@ def run_pipeline(
     hop_size: int=160):
     print("Starting RVC pipeline...")
 
+    setup_logs(os.path.join("logs", model_name))
+
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
     
@@ -184,3 +187,13 @@ def run_pipeline(
         return
     
     print("\nPipeline completed successfully!")
+
+def setup_logs(experiment_path):
+    if not os.path.exists(experiment_path):
+        os.makedirs(experiment_path)
+
+    logging.basicConfig(filename=os.path.join(experiment_path, "experiment_logs.log"),
+                        filemode='a',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.INFO)

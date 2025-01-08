@@ -19,7 +19,7 @@ def run_command(command):
         print(f"Error output: {e.stderr}")
         return False
 
-def run_infer(
+def run_batch_infer(
     pitch, filter_radius, index_rate, volume_envelope, protect, hop_length, f0_method,
     input_path, output_path, pth_path, index_path, split_audio, f0_autotune, clean_audio, clean_strength,
     export_format, embedder_model, embedder_model_custom, upscale_audio, f0_file, formant_shifting,
@@ -30,7 +30,7 @@ def run_infer(
     chorus_feedback, chorus_mix, bitcrush_bit_depth, clipping_threshold, compressor_threshold,
     compressor_ratio, compressor_attack, compressor_release, delay_seconds, delay_feedback, delay_mix
 ):
-    print("===INFER===")
+    print("===BATCH INFER===")
     print(f"pitch {pitch}")
     print(f"filter_radius {filter_radius}")
     print(f"index_rate {index_rate}")
@@ -94,7 +94,7 @@ def run_infer(
     print("===========\n")
 
     cmd = (
-        f"venv/bin/python3 rvc_cli.py infer "
+        f"venv/bin/python3 rvc_cli.py batch_infer "
         f"--pitch {pitch} "
         f"--filter_radius {filter_radius} "
         f"--index_rate {index_rate} "
@@ -220,7 +220,7 @@ def run_pipeline(
     delay_feedback=0.0, 
     delay_mix=0.5
     ):
-    print("Starting RVC inference...")
+    print("Starting RVC batch inference...")
 
     if pth_path == "path-to-pth-file.pth":
         raise Exception("Change 'path-to-pth-file.pth' to something else.")
@@ -228,8 +228,8 @@ def run_pipeline(
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
 
-    print("\nRunning inference...")
-    if not run_infer(
+    print("\nRunning batch inference...")
+    if not run_batch_infer(
         pitch, 
         filter_radius, 
         index_rate, 
@@ -293,4 +293,4 @@ def run_pipeline(
     ):
         return
     
-    print("\nInference completed successfully!")
+    print("\nBatch inference completed successfully!")

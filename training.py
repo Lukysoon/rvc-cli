@@ -14,6 +14,7 @@ def run_command(command):
             text=True
         )
         
+        print(process.stdout)
         logging.info(process.stdout)
         return True
     except subprocess.CalledProcessError as e:

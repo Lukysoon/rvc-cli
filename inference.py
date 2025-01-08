@@ -228,7 +228,7 @@ def run_pipeline(
     if output_path == "output-audio.wav":
         raise Exception("Change 'output-audio.wav' to something else.")
 
-    if output_path == "path-to-pth-file.pth":
+    if pth_path == "path-to-pth-file.pth":
         raise Exception("Change 'path-to-pth-file.pth' to something else.")
 
     if not os.path.exists("venv"):

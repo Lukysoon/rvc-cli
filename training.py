@@ -169,7 +169,7 @@ def run_pipeline(
     overtraining_threshold: int=50, 
     hop_size: int=160):
     print("Starting RVC pipeline...")
-
+    
     if ((g_pretrained_path != "" and not os.path.isfile(g_pretrained_path)) or 
         (d_pretrained_path != "" and not os.path.isfile(d_pretrained_path))):
         raise Exception("The file at path 'g_pretrained_path' or 'd_pretrained_path' doesn't exist.")

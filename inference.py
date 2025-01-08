@@ -300,14 +300,3 @@ def run_pipeline(
         return
     
     print("\nInference completed successfully!")
-
-
-def setup_logs(experiment_path):
-    if not os.path.exists(experiment_path):
-        os.makedirs(experiment_path)
-
-        logging.basicConfig(filename=os.path.join(experiment_path, "experiment_inference_logs.log"),
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%H:%M:%S',
-                            level=logging.INFO)

@@ -21,7 +21,7 @@ def run_command(command):
 
 def run_batch_infer(
     pitch, filter_radius, index_rate, volume_envelope, protect, hop_length, f0_method,
-    input_path, output_path, pth_path, index_path, split_audio, f0_autotune, clean_audio, clean_strength,
+    input_dir_path, output_dir_path, pth_path, index_path, split_audio, f0_autotune, clean_audio, clean_strength,
     export_format, embedder_model, embedder_model_custom, upscale_audio, f0_file, formant_shifting,
     formant_qfrency, formant_timbre, sid, post_process, reverb, pitch_shift, limiter, gain, distortion,
     chorus, bitcrush, clipping, compressor, delay, reverb_room_size, reverb_damping, reverb_wet_gain,
@@ -38,8 +38,8 @@ def run_batch_infer(
     print(f"protect {protect}")
     print(f"hop_length {hop_length}")
     print(f"f0_method {f0_method}")
-    print(f"input_path {input_path}")
-    print(f"output_path {output_path}")
+    print(f"input_dir_path {input_dir_path}")
+    print(f"output_dir_path {output_dir_path}")
     print(f"pth_path {pth_path}")
     print(f"index_path {index_path}")
     print(f"split_audio {split_audio}")
@@ -102,8 +102,8 @@ def run_batch_infer(
         f"--protect {protect} "
         f"--hop_length {hop_length} "
         f"--f0_method {f0_method} "
-        f"--input_path {input_path} "
-        f"--output_path {output_path} "
+        f"--input_folder {input_dir_path} "
+        f"--output_folder {output_dir_path} "
         f"--pth_path {pth_path} "
         f"--index_path {index_path} "
         f"--split_audio {split_audio} "

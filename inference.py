@@ -134,7 +134,7 @@ def run_infer(
         f"--reverb_damping {reverb_damping} "
         f"--reverb_wet_gain {reverb_wet_gain} "
         f"--reverb_dry_gain {reverb_dry_gain} "
-        f"--reverb_width{reverb_width} "
+        f"--reverb_width {reverb_width} "
         f"--reverb_freeze_mode {reverb_freeze_mode} "
         f"--pitch_shift_semitones {pitch_shift_semitones} "
         f"--limiter_threshold {limiter_threshold} "
@@ -159,10 +159,10 @@ def run_infer(
     return run_command(cmd)
 
 def run_pipeline(
-    pitch, 
-    input_path, 
-    output_path, 
-    pth_path, 
+    pitch: int, 
+    input_path: str, 
+    output_path: str, 
+    pth_path: str, 
     filter_radius=3, 
     index_rate=0,
     volume_envelope=0.8, 
@@ -221,6 +221,15 @@ def run_pipeline(
     delay_mix=0.5
     ):
     print("Starting RVC inference...")
+
+    if input_path == "input-audio.wav":
+        raise Exception("Change 'input-audio.wav' to something else.")
+    
+    if output_path == "output-audio.wav":
+        raise Exception("Change 'output-audio.wav' to something else.")
+
+    if output_path == "path-to-pth-file.pth":
+        raise Exception("Change 'path-to-pth-file.pth' to something else.")
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")

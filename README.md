@@ -3,8 +3,8 @@
 ### Getting Started
 
 - Deploy pod with teplate RunPod Pytorch 2.1
-- Run this command in console: ```git clone  https://github.com/Lukysoon/rvc-cli.git```
-- run these commands: ```cd rvc-cli;chmod +x install.sh;./install.sh```
+- run this command in console: ```git clone  https://github.com/Lukysoon/rvc-cli.git;cd rvc-cli;chmod +x install.sh;./install.sh```
+- run tensorboard: ```venv/bin/python3 rvc_cli.py tensorboard```
   
 Open the jupyter notebook and run both cells. If you want to run multiple training series, that copy the second cell and change values. 
 

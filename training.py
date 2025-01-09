@@ -1,5 +1,6 @@
 import subprocess
 import os
+import logging
 
 def run_command(command):
 
@@ -14,6 +15,7 @@ def run_command(command):
         )
         
         print(process.stdout)
+        logging.info(process.stdout)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
@@ -52,7 +54,7 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
     return run_command(cmd)
 
 # Extract command
-def run_extract(model_name, cpu_cores, hop_size=128):
+def run_extract(model_name, cpu_cores, hop_size):
 
     rvc_version = "v2"
     f0_method = "rmvpe"
@@ -167,6 +169,12 @@ def run_pipeline(
     overtraining_threshold: int=50, 
     hop_size: int=160):
     print("Starting RVC pipeline...")
+    
+    if ((g_pretrained_path != "" and not os.path.isfile(g_pretrained_path)) or 
+        (d_pretrained_path != "" and not os.path.isfile(d_pretrained_path))):
+        raise Exception("The file at path 'g_pretrained_path' or 'd_pretrained_path' doesn't exist.")
+
+    setup_logs(os.path.join("logs", model_name))
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
@@ -184,3 +192,13 @@ def run_pipeline(
         return
     
     print("\nPipeline completed successfully!")
+
+def setup_logs(experiment_path):
+    if not os.path.exists(experiment_path):
+        os.makedirs(experiment_path)
+
+    logging.basicConfig(filename=os.path.join(experiment_path, "experiment_train_logs.log"),
+                        filemode='a',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.INFO)

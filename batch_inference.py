@@ -222,6 +222,9 @@ def run_pipeline(
     ):
     print("Starting RVC batch inference...")
 
+    if os.listdir(input_dir_path) == []:
+        print(f"No files found in '{input_dir_path}' directory.")
+
     if pth_path == "path-to-pth-file.pth":
         raise Exception("Change 'path-to-pth-file.pth' to something else.")
 

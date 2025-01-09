@@ -222,11 +222,8 @@ def run_pipeline(
     ):
     print("Starting RVC inference...")
 
-    if input_path == "input-audio.wav":
-        raise Exception("Change 'input-audio.wav' to something else.")
-    
-    if output_path == "output-audio.wav":
-        raise Exception("Change 'output-audio.wav' to something else.")
+    if os.path.isfile(input_path):
+        raise Exception(f"File {input_path} doesn't exists.")
 
     if pth_path == "path-to-pth-file.pth":
         raise Exception("Change 'path-to-pth-file.pth' to something else.")

@@ -14,8 +14,10 @@ def run_command(command):
             text=True
         )
         
-        print(process.stdout)
-        logging.info(process.stdout)
+        with process.stdout:
+            print(process.stdout)
+            logging.info(process.stdout)
+
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
@@ -197,6 +199,7 @@ def setup_logs(experiment_path):
     if not os.path.exists(experiment_path):
         os.makedirs(experiment_path)
 
+    logger = logging.getLogger("Training")
     logging.basicConfig(filename=os.path.join(experiment_path, "experiment_train_logs.log"),
                         filemode='a',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',

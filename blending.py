@@ -52,4 +52,5 @@ def run_pipeline(model_name: str, pth_path_1: str, pth_path_2: str, ratio: float
     if not run_infer(model_name, pth_path_1, pth_path_2, ratio):
         return
     
+    print(f"Blended file was saved to '{os.path.join("logs", model_name + ".pth")}'")
     print("\Blending completed successfully!")

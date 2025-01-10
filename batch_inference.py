@@ -296,4 +296,5 @@ def run_pipeline(
     ):
         return
     
+    print(f"Your files are waiting for you at directory '{output_dir_path}'")
     print("\nBatch inference completed successfully!")

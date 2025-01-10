@@ -222,7 +222,7 @@ def run_pipeline(
     ):
     print("Starting RVC inference...")
 
-    if os.path.isfile(input_path):
+    if not os.path.isfile(input_path):
         raise Exception(f"File {input_path} doesn't exists.")
 
     if pth_path == "path-to-pth-file.pth":
@@ -295,5 +295,5 @@ def run_pipeline(
         delay_mix
     ):
         return
-    
+    print(f"Output file saved to '{output_path}'")
     print("\nInference completed successfully!")

@@ -1,6 +1,7 @@
 import subprocess
 import os
 import logging
+from rvc_cli import run_train_script, run_extract_script, run_preprocess_script
 
 def run_command(command):
 
@@ -41,18 +42,16 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
     print(f"noise_reduction_strength {noise_reduction_strength}")
     print("===============\n")
     
-    cmd = (
-        f"venv/bin/python3 rvc_cli.py preprocess "
-        f"--model_name {model_name} "
-        f"--dataset_path {dataset_path} "
-        f"--sample_rate {sample_rate} "
-        f"--cpu_cores {cpu_cores} "
-        f"--cut_preprocess {cut_preprocess} "
-        f"--process_effects {process_effects} "
-        f"--noise_reduction {noise_reduction} "
-        f"--noise_reduction_strength {noise_reduction_strength} "
+    run_preprocess_script(
+        model_name,
+        dataset_path,
+        sample_rate,
+        cpu_cores,
+        cut_preprocess,
+        process_effects,
+        noise_reduction,
+        noise_reduction_strength
     )
-    return run_command(cmd)
 
 # Extract command
 def run_extract(model_name, cpu_cores, hop_size):
@@ -76,19 +75,17 @@ def run_extract(model_name, cpu_cores, hop_size):
     print(f"embedder_model {embedder_model}")
     print("=====================\n")
 
-    cmd = (
-        f"venv/bin/python3 rvc_cli.py extract "
-        f"--model_name {model_name} "
-        f"--rvc_version {rvc_version} "
-        f"--f0_method {f0_method} "
-        f"--pitch_guidance {pitch_guidance} "
-        f"--hop_length {hop_size} "
-        f"--cpu_cores {cpu_cores} "
-        f"--gpu {gpu} "
-        f"--sample_rate {sample_rate} "
-        f"--embedder_model {embedder_model} "
+    run_extract_script(
+        model_name,
+        rvc_version,
+        f0_method,
+        pitch_guidance,
+        hop_size,
+        cpu_cores,
+        gpu,
+        sample_rate,
+        embedder_model
     )
-    return run_command(cmd)
 
 # Train command
 def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, overtraining_detector=False, overtraining_threshold=50):
@@ -130,29 +127,26 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
     print(f"index_algorithm {index_algorithm}")
     print("===========\n")
 
-    cmd = (
-        f"venv/bin/python3 rvc_cli.py train "
-        f"--model_name {model_name} "
-        f"--rvc_version {rvc_version} "
-        f"--sample_rate {sample_rate} "
-        f"--save_every_epoch {save_every_epoch} "
-        f"--save_only_latest {save_only_latest} "
-        f"--save_every_weights {save_every_weights} "
-        f"--total_epoch {total_epoch} "
-        f"--batch_size {batch_size} "
-        f"--gpu {gpu} "
-        f"--pitch_guidance {pitch_guidance} "
-        f"--pretrained {pretrained} "
-        f"--custom_pretrained {custom_pretrained} "
-        f"--g_pretrained_path {g_pretrained_path} "
-        f"--d_pretrained_path {d_pretrained_path} "
-        f"--overtraining_detector {overtraining_detector} "
-        f"--overtraining_threshold {overtraining_threshold} "
-        f"--cache_data_in_gpu {cache_data_in_gpu} "
-        f"--index_algorithm {index_algorithm} "
-    )
-    return run_command(cmd)
-
+    run_train_script(
+        model_name, 
+        rvc_version, 
+        sample_rate, 
+        save_every_epoch, 
+        save_only_latest, 
+        save_every_weights,
+        total_epoch, 
+        batch_size, 
+        gpu, 
+        pitch_guidance, 
+        pretrained, 
+        custom_pretrained, 
+        g_pretrained_path,
+        d_pretrained_path, 
+        overtraining_detector, 
+        overtraining_threshold, 
+        cache_data_in_gpu, 
+        index_algorithm)
+    
 # Run all steps
 def run_pipeline(
     model_name: str, 

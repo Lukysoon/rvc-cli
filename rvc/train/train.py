@@ -82,11 +82,6 @@ config_save_path = os.path.join(experiment_dir, "config.json")
 dataset_path = os.path.join(experiment_dir, "sliced_audios")
 
 experiment_dir = str(sys.argv[1])
-logging.basicConfig(filename=os.path.join(experiment_dir, "experiment_logs.log"),
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.INFO)
 
 with open(config_save_path, "r") as f:
     config = json.load(f)

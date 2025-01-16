@@ -81,8 +81,6 @@ experiment_dir = os.path.join(current_dir, "logs", model_name)
 config_save_path = os.path.join(experiment_dir, "config.json")
 dataset_path = os.path.join(experiment_dir, "sliced_audios")
 
-experiment_dir = str(sys.argv[1])
-
 with open(config_save_path, "r") as f:
     config = json.load(f)
 config = HParams(**config)

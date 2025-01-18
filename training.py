@@ -90,11 +90,15 @@ def run_extract(model_name, cpu_cores, hop_size):
 # Train command
 def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, overtraining_detector=False, overtraining_threshold=50):
 
-    pretrained = True
     if g_pretrained_path == "" or d_pretrained_path == "":
         print("g_pretrained_path or d_pretrained_path is null")
         print("Training from scratch!")
         pretrained = False
+    else:
+        print(f"Using pretrained D model {d_pretrained_path}")
+        print(f"Using pretrained G model {g_pretrained_path}")
+        print("Training from scratch!")
+        pretrained = True
     
     rvc_version = "v2"
     sample_rate = 48000
@@ -154,8 +158,7 @@ def run_pipeline(
     save_every_epoch: int, 
     total_epoch: int, 
     batch_size: int, 
-    g_pretrained_path: str, 
-    d_pretrained_path: str, 
+    pretrained_dir: str, 
     cut_preprocess: bool=True, 
     process_effects: bool=True,
     noise_reduction: bool=False, 
@@ -164,15 +167,24 @@ def run_pipeline(
     overtraining_threshold: int=50, 
     hop_size: int=160):
     print("Starting RVC pipeline...")
+
+    pretrained_dir = os.path.join("pretrained", pretrained_dir)
+    g_pretrained_path = os.path.join(pretrained_dir, "G.pth")
+    d_pretrained_path = os.path.join(pretrained_dir, "D.pth")
     
-    if ((g_pretrained_path != "" and not os.path.isfile(g_pretrained_path)) or 
-        (d_pretrained_path != "" and not os.path.isfile(d_pretrained_path))):
-        raise Exception("The file at path 'g_pretrained_path' or 'd_pretrained_path' doesn't exist.")
-
-    setup_logs(os.path.join("logs", model_name))
-
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
+
+    if not os.path.isdir(pretrained_dir):
+        raise Exception(f"Directory {pretrained_dir} doesn't exist.")
+
+    if (pretrained_dir != "" and not os.path.isfile(g_pretrained_path)):
+        raise Exception(f"The file '{g_pretrained_path}' doesn't exist.")
+
+    if (pretrained_dir != "" and not os.path.isfile(d_pretrained_path)):
+         raise Exception(f"The file '{d_pretrained_path}' doesn't exist.")
+
+    setup_logs(os.path.join("logs", model_name))
     
     print("\n1. Running preprocessing...")
     if not run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength):

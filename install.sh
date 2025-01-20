@@ -1,4 +1,3 @@
-pip install --upgrade pip
 
 # create base directories
 mkdir -p datasets
@@ -8,14 +7,14 @@ mkdir -p pretrained
 python3 -m venv venv
 source venv/bin/activate
 
-# install necessary libraries
+pip install --upgrade pip
 
 # install jupyter kernel to virtual environment 
 pip install ipykernel
 python3 -m ipykernel install --user --name=venv
 
 apt update
-apt install ffmpeg
+apt install ffmpeg -y
 
 pip install -r requirements.txt
 

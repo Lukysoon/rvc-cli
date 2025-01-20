@@ -10,17 +10,19 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
         sample_rate = 48000
         dataset_path = os.path.join("datasets", model_name)
 
-        print("===PREPROCESS==")
-        print(f"model_name {model_name}")
-        print(f"dataset_path {dataset_path}")
-        print(f"sample_rate {sample_rate}")
-        print(f"cpu_cores {cpu_cores}")
-        print(f"cut_preprocess {cut_preprocess}")
-        print(f"process_effects {process_effects}") 
-        print(f"noise_reduction {noise_reduction}")
-        print(f"noise_reduction_strength {noise_reduction_strength}")
-        print("===============\n")
-        
+        preproces_log = f'''===PREPROCESS==
+        model_name {model_name}
+        dataset_path {dataset_path}
+        sample_rate {sample_rate}
+        cpu_cores {cpu_cores}
+        cut_preprocess {cut_preprocess}
+        process_effects {process_effects}
+        noise_reduction {noise_reduction}
+        noise_reduction_strength {noise_reduction_strength}
+        ===============\n'''
+        print(preproces_log)
+        logging.INFO(preproces_log)
+
         run_preprocess_script(
             model_name,
             dataset_path,
@@ -48,17 +50,20 @@ def run_extract(model_name, cpu_cores, hop_size):
         sample_rate = 48000
         embedder_model = "contentvec"
 
-        print("===EXTRACT FEATURES===")
-        print(f"model_name {model_name}")
-        print(f"rvc_version {rvc_version}")
-        print(f"f0_method {f0_method}")
-        print(f"pitch_guidance {pitch_guidance}")
-        print(f"hop_length {hop_size}")
-        print(f"cpu_cores {cpu_cores}")
-        print(f"gpu {gpu}")
-        print(f"sample_rate {sample_rate}")
-        print(f"embedder_model {embedder_model}")
-        print("=====================\n")
+        extract_log = f'''===EXTRACT FEATURES===
+        model_name {model_name}
+        rvc_version {rvc_version}
+        f0_method {f0_method}
+        pitch_guidance {pitch_guidance}
+        hop_length {hop_size}
+        cpu_cores {cpu_cores}
+        gpu {gpu}
+        sample_rate {sample_rate}
+        embedder_model {embedder_model}
+        ====================\n'''
+
+        print(extract_log)
+        logging.INFO(extract_log)
 
         run_extract_script(
             model_name,
@@ -85,8 +90,8 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
             print("Training from scratch!")
             pretrained = False
         else:
-            print(f"Using pretrained D model {d_pretrained_path}")
-            print(f"Using pretrained G model {g_pretrained_path}")
+            print(f"Using pretrained D model '{d_pretrained_path}'")
+            print(f"Using pretrained G model '{g_pretrained_path}'")
             pretrained = True
         
         rvc_version = "v2"
@@ -100,27 +105,30 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
         index_algorithm = "Auto"
         cleanup = False
 
-        print("===TRAIN===")
-        print(f"model_name {model_name}")
-        print(f"rvc_version {rvc_version}")
-        print(f"save_every_epoch {save_every_epoch}")
-        print(f"save_only_latest {save_only_latest}")
-        print(f"save_every_weights {save_every_weights}")
-        print(f"total_epoch {total_epoch}")
-        print(f"sample_rate {sample_rate}")
-        print(f"batch_size {batch_size}")
-        print(f"gpu {gpu}")
-        print(f"pitch_guidance {pitch_guidance}")
-        print(f"overtraining_detector {overtraining_detector}")
-        print(f"overtraining_threshold {overtraining_threshold}")
-        print(f"pretrained {pretrained}")
-        print(f"cleanup {cleanup}")
-        print(f"index_algorithm {index_algorithm}")
-        print(f"cache_data_in_gpu {cache_data_in_gpu}")
-        print(f"custom_pretrained {custom_pretrained}")
-        print(f"g_pretrained_path {g_pretrained_path}")
-        print(f"d_pretrained_path {d_pretrained_path}")
-        print("===========\n")
+        train_log = f'''===TRAIN===
+        model_name {model_name}")
+        rvc_version {rvc_version}")
+        save_every_epoch {save_every_epoch}")
+        save_only_latest {save_only_latest}")
+        save_every_weights {save_every_weights}")
+        total_epoch {total_epoch}")
+        sample_rate {sample_rate}")
+        batch_size {batch_size}")
+        gpu {gpu}")
+        pitch_guidance {pitch_guidance}")
+        overtraining_detector {overtraining_detector}")
+        overtraining_threshold {overtraining_threshold}")
+        pretrained {pretrained}")
+        cleanup {cleanup}")
+        index_algorithm {index_algorithm}")
+        cache_data_in_gpu {cache_data_in_gpu}")
+        custom_pretrained {custom_pretrained}")
+        g_pretrained_path {g_pretrained_path}")
+        d_pretrained_path {d_pretrained_path}")
+        ==========='''
+
+        print(train_log)
+        logging.INFO(train_log)
 
         run_train_script(
             model_name, 
@@ -176,7 +184,7 @@ def run_pipeline(
         d_pretrained_path = os.path.join(pretrained_dir, "D.pth")
 
         if not os.path.isdir(pretrained_dir):
-            raise Exception(f"Directory {pretrained_dir} doesn't exist.")
+            raise Exception(f"Directory '{pretrained_dir}' doesn't exist.")
 
         if (pretrained_dir != "" and not os.path.isfile(g_pretrained_path)):
             raise Exception(f"The file '{g_pretrained_path}' doesn't exist.")
@@ -202,7 +210,7 @@ def setup_logs(experiment_path):
         os.makedirs(experiment_path)
 
     logger = logging.getLogger("Training")
-    logging.basicConfig(filename=os.path.join(experiment_path, "experiment_train_logs.log"),
+    logging.basicConfig(filename=os.path.join(experiment_path, "train_logs.txt"),
                         filemode='a',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',

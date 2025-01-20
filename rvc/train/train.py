@@ -103,6 +103,12 @@ import logging
 
 logging.getLogger("torch").setLevel(logging.ERROR)
 
+logger = logging.getLogger("Training")
+logging.basicConfig(filename=os.path.join(experiment_dir, "train_logs.log"),
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.INFO)
 
 class EpochRecorder:
     """

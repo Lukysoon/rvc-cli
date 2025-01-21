@@ -10,7 +10,8 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
         sample_rate = 48000
         dataset_path = os.path.join("datasets", model_name)
 
-        preproces_log = f'''===PREPROCESS==
+        preproces_log = f'''
+        ===PREPROCESS==
         model_name {model_name}
         dataset_path {dataset_path}
         sample_rate {sample_rate}
@@ -31,8 +32,7 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
             cut_preprocess,
             process_effects,
             noise_reduction,
-            noise_reduction_strength
-        )
+            noise_reduction_strength)
 
     except Exception as e:
         print("Error in preprocessing:")
@@ -50,7 +50,8 @@ def run_extract(model_name, cpu_cores, hop_size):
         sample_rate = 48000
         embedder_model = "contentvec"
 
-        extract_log = f'''===EXTRACT FEATURES===
+        extract_log = f'''
+        ===EXTRACT FEATURES===
         model_name {model_name}
         rvc_version {rvc_version}
         f0_method {f0_method}
@@ -105,7 +106,8 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
         index_algorithm = "Auto"
         cleanup = False
 
-        train_log = f'''===TRAIN===
+        train_log = f'''
+        ===TRAIN===
         model_name {model_name}")
         rvc_version {rvc_version}")
         save_every_epoch {save_every_epoch}")

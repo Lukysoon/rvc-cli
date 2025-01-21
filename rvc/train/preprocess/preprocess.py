@@ -25,13 +25,6 @@ logging.getLogger("numba.core.byteflow").setLevel(logging.WARNING)
 logging.getLogger("numba.core.ssa").setLevel(logging.WARNING)
 logging.getLogger("numba.core.interpreter").setLevel(logging.WARNING)
 
-experiment_dir = str(sys.argv[1])
-logging.basicConfig(filename=os.path.join(experiment_dir, "experiment_logs.log"),
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.INFO)
-
 # Constants
 OVERLAP = 0.3
 MAX_AMPLITUDE = 0.9

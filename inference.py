@@ -12,8 +12,9 @@ def run_command(command):
             text=True
         )
 
-        logging.info(process.stdout)
+        print(process.stdout)
         return True
+    
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
         print(f"Error output: {e.stderr}")

@@ -222,8 +222,14 @@ def run_pipeline(
     ):
     print("Starting RVC batch inference...")
 
+    if not os.path.exists(output_dir_path):
+        os.makedirs(output_dir_path)
+
+    if not os.path.exists(input_dir_path):
+        raise Exception(f"Change {input_dir_path} to something else.")
+
     if os.listdir(input_dir_path) == []:
-        print(f"No files found in '{input_dir_path}' directory.")
+        raise Exception(f"No files found in '{input_dir_path}' directory.")
 
     if pth_path == "path-to-pth-file.pth":
         raise Exception("Change 'path-to-pth-file.pth' to something else.")
@@ -296,5 +302,5 @@ def run_pipeline(
     ):
         return
     
-    print(f"Your files are waiting for you at directory '{output_dir_path}'")
+    print(f"Your files are waiting for you in directory '{output_dir_path}'")
     print("\nBatch inference completed successfully!")

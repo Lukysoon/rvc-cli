@@ -223,6 +223,9 @@ def run_pipeline(
     ):
     print("Starting RVC batch inference...")
 
+    if input_dir_path == output_dir_path:
+        raise Exception("Input and output directory cannot have a same name.")
+
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
 
@@ -303,5 +306,21 @@ def run_pipeline(
     ):
         return
     
+    remove_suffix_for_files_in_dir(output_dir_path, "_output")
+    
     print(f"Your files are waiting for you in directory '{output_dir_path}'")
     print("\nBatch inference completed successfully!")
+
+def remove_suffix_for_files_in_dir(output_dir_path, suffix):
+    """
+    Removes the specified suffix from files in the given directory.
+    
+    Args:
+        output_dir_path (str): The path to the directory containing the files.
+        suffix (str): The suffix to be removed from the files.
+    """
+    for filename in os.listdir(output_dir_path):
+        new_filename = filename.remove(suffix)
+        old_file_path = os.path.join(output_dir_path, filename)
+        new_file_path = os.path.join(output_dir_path, new_filename)
+        os.rename(old_file_path, new_file_path)

@@ -293,6 +293,8 @@ class VoiceConverter:
                 chunks.append(audio)
 
             converted_chunks = []
+            print("number of chunks")
+            start_pipeline_for_chunks = time.time();
             for c in chunks:
                 audio_opt = self.vc.pipeline(
                     model=self.hubert_model,
@@ -316,7 +318,8 @@ class VoiceConverter:
                 converted_chunks.append(audio_opt)
                 if split_audio:
                     print(f"Converted audio chunk {len(converted_chunks)}")
-
+            print("pipeline for chuk duration:")
+            print(time.time() - start_pipeline_for_chunks)
             if split_audio:
                 audio_opt = merge_audio(converted_chunks, intervals, 16000, self.tgt_sr)
             else:

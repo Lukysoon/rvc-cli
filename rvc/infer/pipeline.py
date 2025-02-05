@@ -10,6 +10,7 @@ import librosa
 import numpy as np
 from scipy import signal
 from torch import Tensor
+import time;
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -441,6 +442,7 @@ class Pipeline:
         with torch.no_grad():
             pitch_guidance = pitch != None and pitchf != None
             # prepare source audio
+            start_psa = time.time()
             feats = (
                 torch.from_numpy(audio0).half()
                 if self.is_half
@@ -449,23 +451,34 @@ class Pipeline:
             feats = feats.mean(-1) if feats.dim() == 2 else feats
             assert feats.dim() == 1, feats.dim()
             feats = feats.view(1, -1).to(self.device)
+            print("prepare source audio:")
+            print(time.time() - start_psa)
             # extract features
+            start_ef = time.time()
             feats = model(feats)["last_hidden_state"]
             feats = (
                 model.final_proj(feats[0]).unsqueeze(0) if version == "v1" else feats
             )
+            print("extract features duration:")
+            print(time.time() - start_ef)
             # make a copy for pitch guidance and protection
             feats0 = feats.clone() if pitch_guidance else None
             if (
                 index
             ):  # set by parent function, only true if index is available, loaded, and index rate > 0
+                start_le = time.time()
                 feats = self._retrieve_speaker_embeddings(
                     feats, index, big_npy, index_rate
                 )
+                print("load speaker embeddings duration")
+                print(time.time() - start_le)
             # feature upsampling
+            start_fu = time.time()
             feats = F.interpolate(feats.permute(0, 2, 1), scale_factor=2).permute(
                 0, 2, 1
             )
+            print("feature upsampling duration")
+            print(time.time() - start_fu)
             # adjust the length if the audio is short
             p_len = min(audio0.shape[0] // self.window, feats.shape[1])
             if pitch_guidance:

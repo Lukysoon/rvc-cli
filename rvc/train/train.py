@@ -103,6 +103,43 @@ import logging
 
 logging.getLogger("torch").setLevel(logging.ERROR)
 
+# ================================
+# INSERTED
+# Create a namespaced logger for the current module
+logger = logging.getLogger(__name__) # Logger named `utils.module_a`
+logger.setLevel(logging.INFO)
+# File handler
+file_handler = logging.FileHandler(os.path.join(experiment_dir,"rvc-training.log"))
+file_handler.setFormatter(logging.Formatter("%(asctime)s | %(name)s | %(levelname)s: %(message)s"))
+# Clear existing handlers
+if logger.hasHandlers():
+    logger.handlers.clear()
+# Add handlers to the logger
+logger.addHandler(file_handler)
+# Ensure logs are propagated to the root logger
+logger.propagate = False
+# Add handlers to the logger
+logger.addHandler(file_handler)
+logger.info("TRAINING LOG")
+
+# Decorator to log method calls and object state
+def log_state(func):
+    def wrapper(self, *args, **kwargs):
+        logger.info(f"Calling {func.__name__} with args: {args} and kwargs: {kwargs}")
+        result = func(self, *args, **kwargs)
+        logger.info(f"Object state: {self.__dict__}")
+        return result
+    return wrapper
+
+# Decorator to log the start and end of a method
+def log_method(func):
+    def wrapper(self, *args, **kwargs):
+        logger.info(f"Starting {func.__name__}")
+        result = func(self, *args, **kwargs)
+        logger.info(f"Finished {func.__name__}")
+        return result
+    return wrapper
+# ================================
 
 class EpochRecorder:
     """
@@ -157,12 +194,12 @@ def main():
     if wavs:
         _, sr = load_wav_to_torch(wavs[0])
         if sr != sample_rate:
-            logging.info(
+            logger.info(
                 f"Error: Pretrained model sample rate ({sample_rate} Hz) does not match dataset audio sample rate ({sr} Hz)."
             )
             os._exit(1)
     else:
-        logging.info("No wav file found.")
+        logger.info("No wav file found.")
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -173,7 +210,7 @@ def main():
     else:
         device = torch.device("cpu")
         n_gpus = 1
-        logging.info("Training with CPU, this will take a long time.")
+        logger.info("Training with CPU, this will take a long time.")
 
     def start():
         """
@@ -720,6 +757,14 @@ def train_and_evaluate(
             "loss/g/mel": loss_mel,
             "loss/g/kl": loss_kl,
         }
+
+        # ================================
+        # INSERTED
+        slog = f"\n  Epoch {epoch}\n  ---------"
+        for k in scalar_dict:
+            slog += f"\n  {k}: {scalar_dict[k]}"
+        logger.info(slog)
+        # ================================
         # commented out
         # scalar_dict.update({f"loss/g/{i}": v for i, v in enumerate(losses_gen)})
         # scalar_dict.update({f"loss/d_r/{i}": v for i, v in enumerate(losses_disc_r)})

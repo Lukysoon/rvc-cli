@@ -268,10 +268,15 @@ class VoiceConverter:
 
             if audio_max > 1:
                 audio /= audio_max
-
+            
+            start_lh = time.time()
+            
             if not self.hubert_model or embedder_model != self.last_embedder_model:
                 self.load_hubert(embedder_model, embedder_model_custom)
                 self.last_embedder_model = embedder_model
+
+            print("loading hubert duration: ")
+            print(time.time() - start_lh)
 
             file_index = (
                 index_path.strip()
@@ -293,8 +298,13 @@ class VoiceConverter:
                 chunks.append(audio)
 
             converted_chunks = []
+
+            print("pre processing duration")
+            print(time.time() - start_time)
+
             print("number of chunks")
-            start_pipeline_for_chunks = time.time();
+            print(len(chunks))
+            start_pipeline_for_chunks = time.time()
             for c in chunks:
                 audio_opt = self.vc.pipeline(
                     model=self.hubert_model,
@@ -320,6 +330,7 @@ class VoiceConverter:
                     print(f"Converted audio chunk {len(converted_chunks)}")
             print("pipeline for chuk duration:")
             print(time.time() - start_pipeline_for_chunks)
+            start_pp = time.time()
             if split_audio:
                 audio_opt = merge_audio(converted_chunks, intervals, 16000, self.tgt_sr)
             else:
@@ -346,6 +357,8 @@ class VoiceConverter:
             audio_output_path = self.convert_audio_format(
                 audio_output_path, output_path_format, export_format
             )
+            print("post processing duration")
+            print(time.time() - start_pp)
 
             elapsed_time = time.time() - start_time
             print(

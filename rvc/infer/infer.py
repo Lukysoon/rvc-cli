@@ -400,7 +400,7 @@ class VoiceConverter:
             print(f"Detected {len(audio_files)} audio files for inference.")
             for a in audio_files:
                 new_input = os.path.join(audio_input_paths, a)
-                new_output = os.path.splitext(a)[0] + ".wav"
+                new_output = os.path.splitext(a)[0] + "_output.wav"
                 new_output = os.path.join(audio_output_path, new_output)
                 if os.path.exists(new_output):
                     continue

@@ -1,6 +1,7 @@
 import subprocess
 import os
 import logging
+from pathlib import Path
 
 def run_command(command):
     try:
@@ -224,6 +225,8 @@ def run_pipeline(
 
     if os.listdir(input_dir_path) == []:
         print(f"No files found in '{input_dir_path}' directory.")
+    
+    Path(output_dir_path).mkdir(parents=True, exist_ok=True)
 
     if pth_path == "path-to-pth-file.pth":
         raise Exception("Change 'path-to-pth-file.pth' to something else.")

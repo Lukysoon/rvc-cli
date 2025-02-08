@@ -7,6 +7,7 @@ import logging
 from custom_logging import get_logger
 
 logging.getLogger("torch").setLevel(logging.ERROR)
+logger = get_logger("/workspace/rvc-cli/batch_inference.log")
 
 def run_command(command):
     try:
@@ -21,8 +22,8 @@ def run_command(command):
         logging.info(process.stdout)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        print(f"Error output: {e.stderr}")
+        logger.info(f"Error executing command: {e}")
+        logger.info(f"Error output: {e.stderr}")
         return False
 
 def run_batch_infer(
@@ -35,10 +36,7 @@ def run_batch_infer(
     limiter_release_time, gain_db, distortion_gain, chorus_rate, chorus_depth, chorus_center_delay,
     chorus_feedback, chorus_mix, bitcrush_bit_depth, clipping_threshold, compressor_threshold,
     compressor_ratio, compressor_attack, compressor_release, delay_seconds, delay_feedback, delay_mix
-):
-    
-    logger = get_logger()
-    
+):    
     logger.info("===BATCH INFER===")
     logger.info(f"pitch {pitch}")
     logger.info(f"filter_radius {filter_radius}")
@@ -229,10 +227,10 @@ def run_pipeline(
     delay_feedback=0.0, 
     delay_mix=0.5
     ):
-    print("Starting RVC batch inference...")
+    logger.info("Starting RVC batch inference...")
 
     if os.listdir(input_dir_path) == []:
-        print(f"No files found in '{input_dir_path}' directory.")
+        logger.info(f"No files found in '{input_dir_path}' directory.")
     
     Path(output_dir_path).mkdir(parents=True, exist_ok=True)
 
@@ -242,7 +240,7 @@ def run_pipeline(
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
 
-    print("\nRunning batch inference...")
+    logger.info("\nRunning batch inference...")
     if not run_batch_infer(
         pitch, 
         filter_radius, 
@@ -312,6 +310,9 @@ def run_pipeline(
     print(f"Your files are waiting for you at directory '{output_dir_path}'")
     print("\nBatch inference completed successfully!")
 
+    logger.info(f"Your files are waiting for you at directory '{output_dir_path}'")
+    logger.info("\nBatch inference completed successfully!")
+
 
 def remove_string_from_filenames_in_directory(directory):
     # Iterate over all files in the directory
@@ -329,4 +330,4 @@ def remove_string_from_filenames_in_directory(directory):
             
             # Rename the file
             os.rename(file_path, new_file_path)
-            print(f'Renamed: {filename} -> {new_filename}')
+            logger.info(f'Renamed: {filename} -> {new_filename}')

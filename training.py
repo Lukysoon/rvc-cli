@@ -77,7 +77,7 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     logger.info(f"gpu {gpu}")
     logger.info(f"sample_rate {sample_rate}")
     logger.info(f"embedder_model {embedder_model}")
-    logger.info("=====================")
+    logger.info("=====================\n")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py extract "
@@ -131,7 +131,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
     logger.info(f"overtraining_threshold {overtraining_threshold}")
     logger.info(f"cache_data_in_gpu {cache_data_in_gpu}")
     logger.info(f"index_algorithm {index_algorithm}")
-    logger.info("===========")
+    logger.info("===========\n")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py train "

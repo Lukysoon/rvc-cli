@@ -1,8 +1,14 @@
 import subprocess
 import os
-import logging
 
-def run_command(command):
+import logging
+from custom_logging import get_logger
+from pathlib import Path
+
+logging.getLogger("torch").setLevel(logging.ERROR)
+
+
+def run_command(command, logger):
 
     try:
         # Use shell=True and create a new shell session
@@ -13,33 +19,30 @@ def run_command(command):
             capture_output=True,
             text=True
         )
-        
-        print(process.stdout)
-        logging.info(process.stdout)
 
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        print(f"Error output: {e.stderr}")
-        return False
+        logger.info(f"Error executing command: {e}")
+        logger.info(f"Error output: {e.stderr}")
+        raise Exception(e.stderr)
 
 
 # Preprocess command
-def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength):
+def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger):
     
     sample_rate = 48000
     dataset_path = os.path.join("datasets", model_name)
 
-    print("===PREPROCESS==")
-    print(f"model_name {model_name}")
-    print(f"dataset_path {dataset_path}")
-    print(f"sample_rate {sample_rate}")
-    print(f"cpu_cores {cpu_cores}")
-    print(f"cut_preprocess {cut_preprocess}")
-    print(f"process_effects {process_effects}") 
-    print(f"noise_reduction {noise_reduction}")
-    print(f"noise_reduction_strength {noise_reduction_strength}")
-    print("===============\n")
+    logger.info("===PREPROCESS==")
+    logger.info(f"model_name {model_name}")
+    logger.info(f"dataset_path {dataset_path}")
+    logger.info(f"sample_rate {sample_rate}")
+    logger.info(f"cpu_cores {cpu_cores}")
+    logger.info(f"cut_preprocess {cut_preprocess}")
+    logger.info(f"process_effects {process_effects}") 
+    logger.info(f"noise_reduction {noise_reduction}")
+    logger.info(f"noise_reduction_strength {noise_reduction_strength}")
+    logger.info("===============\n")
     
     cmd = (
         f"venv/bin/python3 rvc_cli.py preprocess "
@@ -52,10 +55,10 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
         f"--noise_reduction {noise_reduction} "
         f"--noise_reduction_strength {noise_reduction_strength} "
     )
-    return run_command(cmd)
+    return run_command(cmd, logger)
 
 # Extract command
-def run_extract(model_name, cpu_cores, hop_size):
+def run_extract(model_name, cpu_cores, hop_size, logger):
 
     rvc_version = "v2"
     f0_method = "rmvpe"
@@ -64,17 +67,17 @@ def run_extract(model_name, cpu_cores, hop_size):
     sample_rate = 48000
     embedder_model = "contentvec"
 
-    print("===EXTRACT FEATURES===")
-    print(f"model_name {model_name}")
-    print(f"rvc_version {rvc_version}")
-    print(f"f0_method {f0_method}")
-    print(f"pitch_guidance {pitch_guidance}")
-    print(f"hop_length {hop_size}")
-    print(f"cpu_cores {cpu_cores}")
-    print(f"gpu {gpu}")
-    print(f"sample_rate {sample_rate}")
-    print(f"embedder_model {embedder_model}")
-    print("=====================\n")
+    logger.info("===EXTRACT FEATURES===")
+    logger.info(f"model_name {model_name}")
+    logger.info(f"rvc_version {rvc_version}")
+    logger.info(f"f0_method {f0_method}")
+    logger.info(f"pitch_guidance {pitch_guidance}")
+    logger.info(f"hop_length {hop_size}")
+    logger.info(f"cpu_cores {cpu_cores}")
+    logger.info(f"gpu {gpu}")
+    logger.info(f"sample_rate {sample_rate}")
+    logger.info(f"embedder_model {embedder_model}")
+    logger.info("=====================")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py extract "
@@ -88,15 +91,15 @@ def run_extract(model_name, cpu_cores, hop_size):
         f"--sample_rate {sample_rate} "
         f"--embedder_model {embedder_model} "
     )
-    return run_command(cmd)
+    return run_command(cmd, logger)
 
 # Train command
-def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, overtraining_detector=False, overtraining_threshold=50):
+def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector=False, overtraining_threshold=50):
 
     pretrained = True
     if g_pretrained_path == "" or d_pretrained_path == "":
-        print("g_pretrained_path or d_pretrained_path is null")
-        print("Training from scratch!")
+        logger.info("g_pretrained_path or d_pretrained_path is null")
+        logger.info("Training from scratch!")
         pretrained = False
     
     rvc_version = "v2"
@@ -109,26 +112,26 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
     cache_data_in_gpu = False
     index_algorithm = "Auto"
 
-    print("===TRAIN===")
-    print(f"model_name {model_name}")
-    print(f"rvc_version {rvc_version}")
-    print(f"sample_rate {sample_rate}")
-    print(f"save_every_epoch {save_every_epoch}")
-    print(f"save_only_latest {save_only_latest}")
-    print(f"save_every_weights {save_every_weights}")
-    print(f"total_epoch {total_epoch}")
-    print(f"batch_size {batch_size}")
-    print(f"gpu {gpu}")
-    print(f"pitch_guidance {pitch_guidance}")
-    print(f"pretrained {pretrained}")
-    print(f"custom_pretrained {custom_pretrained}")
-    print(f"g_pretrained_path {g_pretrained_path}")
-    print(f"d_pretrained_path {d_pretrained_path}")
-    print(f"overtraining_detector {overtraining_detector}")
-    print(f"overtraining_threshold {overtraining_threshold}")
-    print(f"cache_data_in_gpu {cache_data_in_gpu}")
-    print(f"index_algorithm {index_algorithm}")
-    print("===========\n")
+    logger.info("===TRAIN===")
+    logger.info(f"model_name {model_name}")
+    logger.info(f"rvc_version {rvc_version}")
+    logger.info(f"sample_rate {sample_rate}")
+    logger.info(f"save_every_epoch {save_every_epoch}")
+    logger.info(f"save_only_latest {save_only_latest}")
+    logger.info(f"save_every_weights {save_every_weights}")
+    logger.info(f"total_epoch {total_epoch}")
+    logger.info(f"batch_size {batch_size}")
+    logger.info(f"gpu {gpu}")
+    logger.info(f"pitch_guidance {pitch_guidance}")
+    logger.info(f"pretrained {pretrained}")
+    logger.info(f"custom_pretrained {custom_pretrained}")
+    logger.info(f"g_pretrained_path {g_pretrained_path}")
+    logger.info(f"d_pretrained_path {d_pretrained_path}")
+    logger.info(f"overtraining_detector {overtraining_detector}")
+    logger.info(f"overtraining_threshold {overtraining_threshold}")
+    logger.info(f"cache_data_in_gpu {cache_data_in_gpu}")
+    logger.info(f"index_algorithm {index_algorithm}")
+    logger.info("===========")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py train "
@@ -151,7 +154,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
         f"--cache_data_in_gpu {cache_data_in_gpu} "
         f"--index_algorithm {index_algorithm} "
     )
-    return run_command(cmd)
+    return run_command(cmd, logger)
 
 # Run all steps
 def run_pipeline(
@@ -169,38 +172,31 @@ def run_pipeline(
     overtraining_detector: bool=False, 
     overtraining_threshold: int=50, 
     hop_size: int=160):
-    print("Starting RVC pipeline...")
+
+    # create experiment directory
+    Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
+
+    logger = get_logger(f"/workspace/rvc-cli/logs/{model_name}/training.log")
+
+    logger.info("Starting RVC pipeline...")
     
     if ((g_pretrained_path != "" and not os.path.isfile(g_pretrained_path)) or 
         (d_pretrained_path != "" and not os.path.isfile(d_pretrained_path))):
         raise Exception("The file at path 'g_pretrained_path' or 'd_pretrained_path' doesn't exist.")
 
-    setup_logs(os.path.join("logs", model_name))
-
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
     
-    print("\n1. Running preprocessing...")
-    if not run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength):
+    logger.info("1. Running preprocessing...")
+    if not run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger):
         return
     
-    print("\n2. Running feature extraction...")
-    if not run_extract(model_name, cpu_cores, hop_size):
+    logger.info("2. Running feature extraction...")
+    if not run_extract(model_name, cpu_cores, hop_size, logger):
         return
     
-    print("\n3. Running training...")
-    if not run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, overtraining_detector, overtraining_threshold):
+    logger.info("3. Running training...")
+    if not run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, overtraining_detector, overtraining_threshold, logger):
         return
     
-    print("\nPipeline completed successfully!")
-
-def setup_logs(experiment_path):
-    if not os.path.exists(experiment_path):
-        os.makedirs(experiment_path)
-
-    logger = logging.getLogger("Training")
-    logging.basicConfig(filename=os.path.join(experiment_path, "experiment_train_logs.log"),
-                        filemode='a',
-                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                        datefmt='%H:%M:%S',
-                        level=logging.INFO)
+    logger.info("Pipeline completed successfully!")

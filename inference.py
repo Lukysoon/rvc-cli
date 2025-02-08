@@ -1,8 +1,9 @@
 import subprocess
 import os
 import logging
+from custom_logging import get_logger
 
-def run_command(command):
+def run_command(command, logger):
     try:
         process = subprocess.run(
             command,
@@ -12,11 +13,10 @@ def run_command(command):
             text=True
         )
 
-        logging.info(process.stdout)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        print(f"Error output: {e.stderr}")
+        logger.info(f"Error executing command: {e}")
+        logger.info(f"Error output: {e.stderr}")
         return False
 
 def run_infer(
@@ -28,70 +28,70 @@ def run_infer(
     reverb_dry_gain, reverb_width, reverb_freeze_mode, pitch_shift_semitones, limiter_threshold,
     limiter_release_time, gain_db, distortion_gain, chorus_rate, chorus_depth, chorus_center_delay,
     chorus_feedback, chorus_mix, bitcrush_bit_depth, clipping_threshold, compressor_threshold,
-    compressor_ratio, compressor_attack, compressor_release, delay_seconds, delay_feedback, delay_mix
+    compressor_ratio, compressor_attack, compressor_release, delay_seconds, delay_feedback, delay_mix, logger
 ):
-    print("===INFER===")
-    print(f"pitch {pitch}")
-    print(f"filter_radius {filter_radius}")
-    print(f"index_rate {index_rate}")
-    print(f"volume_envelope {volume_envelope}")
-    print(f"protect {protect}")
-    print(f"hop_length {hop_length}")
-    print(f"f0_method {f0_method}")
-    print(f"input_path {input_path}")
-    print(f"output_path {output_path}")
-    print(f"pth_path {pth_path}")
-    print(f"index_path {index_path}")
-    print(f"split_audio {split_audio}")
-    print(f"f0_autotune {f0_autotune}")
-    print(f"clean_audio {clean_audio}")
-    print(f"clean_strength {clean_strength}")
-    print(f"export_format {export_format}")
-    print(f"embedder_model {embedder_model}")
-    print(f"embedder_model_custom {embedder_model_custom}")
-    print(f"upscale_audio {upscale_audio}")
-    print(f"f0_file {f0_file}")
-    print(f"formant_shifting {formant_shifting}")
-    print(f"formant_qfrency {formant_qfrency}")
-    print(f"formant_timbre {formant_timbre}")
-    print(f"sid {sid}")
-    print(f"post_process {post_process}")
-    print(f"reverb {reverb}")
-    print(f"pitch_shift {pitch_shift}")
-    print(f"limiter {limiter}")
-    print(f"gain {gain}")
-    print(f"distortion {distortion}")
-    print(f"chorus {chorus}")
-    print(f"bitcrush {bitcrush}")
-    print(f"clipping {clipping}")
-    print(f"compressor {compressor}")
-    print(f"delay {delay}")
-    print(f"reverb_room_size {reverb_room_size}")
-    print(f"reverb_damping {reverb_damping}")
-    print(f"reverb_wet_gain {reverb_wet_gain}")
-    print(f"reverb_dry_gain {reverb_dry_gain}")
-    print(f"reverb_width {reverb_width}")
-    print(f"reverb_freeze_mode {reverb_freeze_mode}")
-    print(f"pitch_shift_semitones {pitch_shift_semitones}")
-    print(f"limiter_threshold {limiter_threshold}")
-    print(f"limiter_release_time {limiter_release_time}")
-    print(f"gain_db {gain_db}")
-    print(f"distortion_gain {distortion_gain}")
-    print(f"chorus_rate {chorus_rate}")
-    print(f"chorus_depth {chorus_depth}")
-    print(f"chorus_center_delay {chorus_center_delay}")
-    print(f"chorus_feedback {chorus_feedback}")
-    print(f"chorus_mix {chorus_mix}")
-    print(f"bitcrush_bit_depth {bitcrush_bit_depth}")
-    print(f"clipping_threshold {clipping_threshold}")
-    print(f"compressor_threshold {compressor_threshold}")
-    print(f"compressor_ratio {compressor_ratio}")
-    print(f"compressor_attack {compressor_attack}")
-    print(f"compressor_release {compressor_release}")
-    print(f"delay_seconds {delay_seconds}")
-    print(f"delay_feedback {delay_feedback}")
-    print(f"delay_mix {delay_mix}")
-    print("===========\n")
+    logger.info("===INFER===")
+    logger.info(f"pitch {pitch}")
+    logger.info(f"filter_radius {filter_radius}")
+    logger.info(f"index_rate {index_rate}")
+    logger.info(f"volume_envelope {volume_envelope}")
+    logger.info(f"protect {protect}")
+    logger.info(f"hop_length {hop_length}")
+    logger.info(f"f0_method {f0_method}")
+    logger.info(f"input_path {input_path}")
+    logger.info(f"output_path {output_path}")
+    logger.info(f"pth_path {pth_path}")
+    logger.info(f"index_path {index_path}")
+    logger.info(f"split_audio {split_audio}")
+    logger.info(f"f0_autotune {f0_autotune}")
+    logger.info(f"clean_audio {clean_audio}")
+    logger.info(f"clean_strength {clean_strength}")
+    logger.info(f"export_format {export_format}")
+    logger.info(f"embedder_model {embedder_model}")
+    logger.info(f"embedder_model_custom {embedder_model_custom}")
+    logger.info(f"upscale_audio {upscale_audio}")
+    logger.info(f"f0_file {f0_file}")
+    logger.info(f"formant_shifting {formant_shifting}")
+    logger.info(f"formant_qfrency {formant_qfrency}")
+    logger.info(f"formant_timbre {formant_timbre}")
+    logger.info(f"sid {sid}")
+    logger.info(f"post_process {post_process}")
+    logger.info(f"reverb {reverb}")
+    logger.info(f"pitch_shift {pitch_shift}")
+    logger.info(f"limiter {limiter}")
+    logger.info(f"gain {gain}")
+    logger.info(f"distortion {distortion}")
+    logger.info(f"chorus {chorus}")
+    logger.info(f"bitcrush {bitcrush}")
+    logger.info(f"clipping {clipping}")
+    logger.info(f"compressor {compressor}")
+    logger.info(f"delay {delay}")
+    logger.info(f"reverb_room_size {reverb_room_size}")
+    logger.info(f"reverb_damping {reverb_damping}")
+    logger.info(f"reverb_wet_gain {reverb_wet_gain}")
+    logger.info(f"reverb_dry_gain {reverb_dry_gain}")
+    logger.info(f"reverb_width {reverb_width}")
+    logger.info(f"reverb_freeze_mode {reverb_freeze_mode}")
+    logger.info(f"pitch_shift_semitones {pitch_shift_semitones}")
+    logger.info(f"limiter_threshold {limiter_threshold}")
+    logger.info(f"limiter_release_time {limiter_release_time}")
+    logger.info(f"gain_db {gain_db}")
+    logger.info(f"distortion_gain {distortion_gain}")
+    logger.info(f"chorus_rate {chorus_rate}")
+    logger.info(f"chorus_depth {chorus_depth}")
+    logger.info(f"chorus_center_delay {chorus_center_delay}")
+    logger.info(f"chorus_feedback {chorus_feedback}")
+    logger.info(f"chorus_mix {chorus_mix}")
+    logger.info(f"bitcrush_bit_depth {bitcrush_bit_depth}")
+    logger.info(f"clipping_threshold {clipping_threshold}")
+    logger.info(f"compressor_threshold {compressor_threshold}")
+    logger.info(f"compressor_ratio {compressor_ratio}")
+    logger.info(f"compressor_attack {compressor_attack}")
+    logger.info(f"compressor_release {compressor_release}")
+    logger.info(f"delay_seconds {delay_seconds}")
+    logger.info(f"delay_feedback {delay_feedback}")
+    logger.info(f"delay_mix {delay_mix}")
+    logger.info("===========")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py infer "
@@ -156,7 +156,7 @@ def run_infer(
         f"--delay_feedback {delay_feedback} "
         f"--delay_mix {delay_mix} "
         )
-    return run_command(cmd)
+    return run_command(cmd, logger)
 
 def run_pipeline(
     pitch: int, 
@@ -220,7 +220,10 @@ def run_pipeline(
     delay_feedback=0.0, 
     delay_mix=0.5
     ):
-    print("Starting RVC inference...")
+
+    logger = get_logger(f"/workspace/rvc-cli/inference.log")
+
+    logger.info("Starting RVC inference...")
 
     if not os.path.isfile(input_path):
         raise Exception(f"File {input_path} doesn't exists.")
@@ -231,7 +234,7 @@ def run_pipeline(
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
 
-    print("\nRunning inference...")
+    logger.info("Running inference...")
     if not run_infer(
         pitch, 
         filter_radius, 
@@ -292,8 +295,9 @@ def run_pipeline(
         compressor_release, 
         delay_seconds, 
         delay_feedback, 
-        delay_mix
+        delay_mix,
+        logger
     ):
         return
-    print(f"Output file saved to '{output_path}'")
-    print("\nInference completed successfully!")
+    logger.info(f"Output file saved to '{output_path}'")
+    logger.info("Inference completed successfully!")

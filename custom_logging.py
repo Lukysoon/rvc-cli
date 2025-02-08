@@ -19,6 +19,5 @@ def get_logger(path_to_log_file):
     logger.propagate = False
     # Add handlers to the logger
     logger.addHandler(file_handler)
-    logger.info("TRAINING LOG")
 
     return logger

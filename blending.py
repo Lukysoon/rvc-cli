@@ -1,8 +1,9 @@
 import subprocess
 import os
 import logging
+from custom_logging import get_logger
 
-def run_command(command):
+def run_command(command, logger):
     try:
         process = subprocess.run(
             command,
@@ -15,17 +16,17 @@ def run_command(command):
         logging.info(process.stdout)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        print(f"Error output: {e.stderr}")
+        logger.info(f"Error executing command: {e}")
+        logger.info(f"Error output: {e.stderr}")
         return False
 
-def run_infer(model_name, pth_path_1, pth_path_2, ratio):
-    print("===BLEND===")
-    print(f"model_name {model_name}")
-    print(f"pth_path_1 {pth_path_1}")
-    print(f"pth_path_2 {pth_path_2}")
-    print(f"ratio {ratio}")
-    print("===========\n")
+def run_infer(model_name, pth_path_1, pth_path_2, ratio, logger):
+    logger.info("===BLEND===")
+    logger.info(f"model_name {model_name}")
+    logger.info(f"pth_path_1 {pth_path_1}")
+    logger.info(f"pth_path_2 {pth_path_2}")
+    logger.info(f"ratio {ratio}")
+    logger.info("===========\n")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py model_blender "
@@ -34,10 +35,11 @@ def run_infer(model_name, pth_path_1, pth_path_2, ratio):
         f"--pth_path_2 {pth_path_2} "
         f"--ratio {ratio} "
         )
-    return run_command(cmd)
+    return run_command(cmd, logger)
 
 def run_pipeline(model_name: str, pth_path_1: str, pth_path_2: str, ratio: float):
-    print("Starting RVC Blending...")
+    logger = get_logger(f"/workspace/rvc-cli/logs/{model_name}/training.log")
+    logger.info("Starting RVC Blending...")
     
     if pth_path_1 == "pth_path_1.pth":
         raise Exception("Change 'pth_path_1.pth' to something else.")
@@ -48,9 +50,9 @@ def run_pipeline(model_name: str, pth_path_1: str, pth_path_2: str, ratio: float
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
 
-    print("\nRunning blending...")
-    if not run_infer(model_name, pth_path_1, pth_path_2, ratio):
+    logger.info("Running blending...")
+    if not run_infer(model_name, pth_path_1, pth_path_2, ratio, logger):
         return
     
-    print(f"Blended file was saved to '{os.path.join('logs', model_name + '.pth')}'")
-    print("\Blending completed successfully!")
+    logger.info(f"Blended file was saved to '{os.path.join('logs', model_name + '.pth')}'")
+    logger.info("\Blending completed successfully!")

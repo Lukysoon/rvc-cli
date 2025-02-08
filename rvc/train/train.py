@@ -5,6 +5,7 @@ import glob
 import json
 import torch
 import datetime
+from custom_logging import get_logger
 
 from distutils.util import strtobool
 from random import randint, shuffle
@@ -103,23 +104,7 @@ import logging
 
 logging.getLogger("torch").setLevel(logging.ERROR)
 
-# ================================
-# INSERTED
-# Create a namespaced logger for the current module
-logger = logging.getLogger(__name__) # Logger named `utils.module_a`
-logger.setLevel(logging.INFO)
-# File handler
-file_handler = logging.FileHandler(os.path.join(experiment_dir,"rvc-training.log"))
-file_handler.setFormatter(logging.Formatter("%(asctime)s | %(name)s | %(levelname)s: %(message)s"))
-# Clear existing handlers
-if logger.hasHandlers():
-    logger.handlers.clear()
-# Add handlers to the logger
-logger.addHandler(file_handler)
-# Ensure logs are propagated to the root logger
-logger.propagate = False
-# Add handlers to the logger
-logger.addHandler(file_handler)
+logger = get_logger(os.path.join(experiment_dir,"training.log"))
 logger.info("TRAINING LOG")
 
 # Decorator to log method calls and object state

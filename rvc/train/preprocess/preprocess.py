@@ -19,6 +19,7 @@ from rvc.lib.utils import load_audio
 from rvc.train.preprocess.slicer import Slicer
 
 # Remove colab logs
+from custom_logging import get_logger
 import logging
 
 logging.getLogger("numba.core.byteflow").setLevel(logging.WARNING)
@@ -26,11 +27,7 @@ logging.getLogger("numba.core.ssa").setLevel(logging.WARNING)
 logging.getLogger("numba.core.interpreter").setLevel(logging.WARNING)
 
 experiment_dir = str(sys.argv[1])
-logging.basicConfig(filename=os.path.join(experiment_dir, "experiment_logs.log"),
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.INFO)
+logger = get_logger(os.path.join(experiment_dir, "/training.log"))
 
 # Constants
 OVERLAP = 0.3
@@ -76,7 +73,7 @@ class PreProcess:
         idx1: int,
     ):
         if normalized_audio is None:
-            logging.info(f"{sid}-{idx0}-{idx1}-filtered")
+            logger.info(f"{sid}-{idx0}-{idx1}-filtered")
             return
         wavfile.write(
             os.path.join(self.gt_wavs_dir, f"{sid}_{idx0}_{idx1}.wav"),
@@ -149,7 +146,7 @@ class PreProcess:
                     idx1,
                 )
         except Exception as error:
-            logging.info(f"Error processing audio: {error}")
+            logger.info(f"Error processing audio: {error}")
         return audio_length
 
 
@@ -207,7 +204,7 @@ def preprocess_training_set(
 ):
     start_time = time.time()
     pp = PreProcess(sr, exp_dir, per)
-    logging.info(f"Starting preprocess with {num_processes} processes...")
+    logger.info(f"Starting preprocess with {num_processes} processes...")
 
     files = []
     idx = 0
@@ -220,7 +217,7 @@ def preprocess_training_set(
                     files.append((os.path.join(root, f), idx, sid))
                     idx += 1
         except ValueError:
-            logging.info(
+            logger.info(
                 f'Speaker ID folder is expected to be integer, got "{os.path.basename(root)}" instead.'
             )
 
@@ -253,7 +250,7 @@ def preprocess_training_set(
         os.path.join(exp_dir, "model_info.json"), dataset_duration=audio_length
     )
     elapsed_time = time.time() - start_time
-    logging.info(
+    logger.info(
         f"Preprocess completed in {elapsed_time:.2f} seconds on {format_duration(audio_length)} seconds of audio."
     )
 

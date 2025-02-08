@@ -196,7 +196,7 @@ def run_pipeline(
         return
     
     logger.info("3. Running training...")
-    if not run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, overtraining_detector, overtraining_threshold, logger):
+    if not run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold):
         return
     
     logger.info("Pipeline completed successfully!")

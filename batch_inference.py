@@ -297,15 +297,15 @@ def run_pipeline(
         delay_feedback, 
         delay_mix
     ):
-        remove_string_from_filenames_in_directory(output_dir_path)
         return
     
+    remove_string_from_filenames_in_directory(output_dir_path)
+
     print(f"Your files are waiting for you at directory '{output_dir_path}'")
     print("\nBatch inference completed successfully!")
 
 
 def remove_string_from_filenames_in_directory(directory):
-
     # Iterate over all files in the directory
     for filename in os.listdir(directory):
         # Construct the full file path

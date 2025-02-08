@@ -240,7 +240,7 @@ def run_pipeline(
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
 
-    logger.info("\nRunning batch inference...")
+    logger.info("Running batch inference...")
     if not run_batch_infer(
         pitch, 
         filter_radius, 
@@ -311,7 +311,7 @@ def run_pipeline(
     print("\nBatch inference completed successfully!")
 
     logger.info(f"Your files are waiting for you at directory '{output_dir_path}'")
-    logger.info("\nBatch inference completed successfully!")
+    logger.info("Batch inference completed successfully!")
 
 
 def remove_string_from_filenames_in_directory(directory):

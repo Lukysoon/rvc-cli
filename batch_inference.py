@@ -297,7 +297,28 @@ def run_pipeline(
         delay_feedback, 
         delay_mix
     ):
+        remove_string_from_filenames_in_directory(output_dir_path)
         return
     
     print(f"Your files are waiting for you at directory '{output_dir_path}'")
     print("\nBatch inference completed successfully!")
+
+
+def remove_string_from_filenames_in_directory(directory):
+
+    # Iterate over all files in the directory
+    for filename in os.listdir(directory):
+        # Construct the full file path
+        file_path = os.path.join(directory, filename)
+        
+        # Check if it's a file (not a directory)
+        if os.path.isfile(file_path):
+            # Remove "_output" from the filename
+            new_filename = filename.replace("_output", "")
+            
+            # Construct the new full file path
+            new_file_path = os.path.join(directory, new_filename)
+            
+            # Rename the file
+            os.rename(file_path, new_file_path)
+            print(f'Renamed: {filename} -> {new_filename}')

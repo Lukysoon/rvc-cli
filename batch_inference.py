@@ -1,6 +1,7 @@
 import subprocess
 import os
 import logging
+from pathlib import Path
 
 def run_command(command):
     try:
@@ -224,6 +225,8 @@ def run_pipeline(
 
     if os.listdir(input_dir_path) == []:
         print(f"No files found in '{input_dir_path}' directory.")
+    
+    Path(output_dir_path).mkdir(parents=True, exist_ok=True)
 
     if pth_path == "path-to-pth-file.pth":
         raise Exception("Change 'path-to-pth-file.pth' to something else.")
@@ -296,5 +299,26 @@ def run_pipeline(
     ):
         return
     
+    remove_string_from_filenames_in_directory(output_dir_path)
+
     print(f"Your files are waiting for you at directory '{output_dir_path}'")
     print("\nBatch inference completed successfully!")
+
+
+def remove_string_from_filenames_in_directory(directory):
+    # Iterate over all files in the directory
+    for filename in os.listdir(directory):
+        # Construct the full file path
+        file_path = os.path.join(directory, filename)
+        
+        # Check if it's a file (not a directory)
+        if os.path.isfile(file_path):
+            # Remove "_output" from the filename
+            new_filename = filename.replace("_output", "")
+            
+            # Construct the new full file path
+            new_file_path = os.path.join(directory, new_filename)
+            
+            # Rename the file
+            os.rename(file_path, new_file_path)
+            print(f'Renamed: {filename} -> {new_filename}')

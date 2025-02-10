@@ -17,7 +17,7 @@ def run_command(command, logger):
     except subprocess.CalledProcessError as e:
         logger.info(f"Error executing command: {e}")
         logger.info(f"Error output: {e.stderr}")
-        return False
+        raise Exception(e.stderr)
 
 def run_infer(
     pitch, filter_radius, index_rate, volume_envelope, protect, hop_length, f0_method,
@@ -235,6 +235,7 @@ def run_pipeline(
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
 
     logger.info("Running inference...")
+    print("Running inference...")
     if not run_infer(
         pitch, 
         filter_radius, 
@@ -301,3 +302,6 @@ def run_pipeline(
         return
     logger.info(f"Output file saved to '{output_path}'")
     logger.info("Inference completed successfully!")
+
+    print(f"Output file saved to '{output_path}'")
+    print("Inference completed successfully!")

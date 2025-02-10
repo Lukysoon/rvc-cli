@@ -24,7 +24,7 @@ def run_command(command):
     except subprocess.CalledProcessError as e:
         logger.info(f"Error executing command: {e}")
         logger.info(f"Error output: {e.stderr}")
-        return False
+        raise Exception(e.stderr)
 
 def run_batch_infer(
     pitch, filter_radius, index_rate, volume_envelope, protect, hop_length, f0_method,
@@ -241,6 +241,7 @@ def run_pipeline(
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
 
     logger.info("Running batch inference...")
+    print("Running batch inference...")
     if not run_batch_infer(
         pitch, 
         filter_radius, 
@@ -307,11 +308,11 @@ def run_pipeline(
     
     remove_string_from_filenames_in_directory(output_dir_path)
 
-    print(f"Your files are waiting for you at directory '{output_dir_path}'")
-    print("\nBatch inference completed successfully!")
-
     logger.info(f"Your files are waiting for you at directory '{output_dir_path}'")
     logger.info("Batch inference completed successfully!")
+
+    print(f"Your files are waiting for you at directory '{output_dir_path}'")
+    print("\nBatch inference completed successfully!")
 
 
 def remove_string_from_filenames_in_directory(directory):

@@ -188,15 +188,19 @@ def run_pipeline(
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
     
     logger.info("1. Running preprocessing...")
+    print("1. Running preprocessing...")
     if not run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger):
         return
     
     logger.info("2. Running feature extraction...")
+    print("2. Running feature extraction...")
     if not run_extract(model_name, cpu_cores, hop_size, logger):
         return
     
     logger.info("3. Running training...")
+    print("3. Running training...")
     if not run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold):
         return
     
     logger.info("Pipeline completed successfully!")
+    print("Pipeline completed successfully!")

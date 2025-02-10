@@ -5,7 +5,6 @@ import glob
 import json
 import torch
 import datetime
-from custom_logging import get_logger
 
 from distutils.util import strtobool
 from random import randint, shuffle
@@ -21,6 +20,8 @@ from torch.nn import functional as F
 
 import torch.distributed as dist
 import torch.multiprocessing as mp
+
+import time
 
 now_dir = os.getcwd()
 sys.path.append(os.path.join(now_dir))
@@ -103,9 +104,9 @@ training_file_path = os.path.join(experiment_dir, "training_data.json")
 import logging
 
 # logging.getLogger("torch").setLevel(logging.ERROR)
+from custom_logging import get_logger
 
 logger = get_logger(os.path.join(experiment_dir, "training.log"))
-logger.info("TRAINING LOG")
 
 # Decorator to log method calls and object state
 def log_state(func):
@@ -539,6 +540,8 @@ def train_and_evaluate(
     """
     global global_step, lowest_value, loss_disc, consecutive_increases_gen, consecutive_increases_disc, smoothed_value_gen, smoothed_value_disc
 
+    epoch_start = time.time()
+
     if epoch == 1:
         lowest_value = {"step": 0, "value": float("inf"), "epoch": 0}
         last_loss_gen_all = 0.0
@@ -745,7 +748,8 @@ def train_and_evaluate(
 
         # ================================
         # INSERTED
-        slog = f"\n  Epoch {epoch}\n  ---------"
+        epoch_duration = time.time() - epoch_start
+        slog = f"\n  Epoch {epoch} | duration {epoch_duration} \n  ---------"
         for k in scalar_dict:
             slog += f"\n  {k}: {scalar_dict[k]}"
         logger.info(slog)

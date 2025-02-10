@@ -98,7 +98,7 @@ def run_batch_infer(
     logger.info(f"delay_seconds {delay_seconds}")
     logger.info(f"delay_feedback {delay_feedback}")
     logger.info(f"delay_mix {delay_mix}")
-    logger.info("===========\n")
+    logger.info("===========")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py batch_infer "

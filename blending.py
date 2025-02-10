@@ -26,7 +26,7 @@ def run_infer(model_name, pth_path_1, pth_path_2, ratio, logger):
     logger.info(f"pth_path_1 {pth_path_1}")
     logger.info(f"pth_path_2 {pth_path_2}")
     logger.info(f"ratio {ratio}")
-    logger.info("===========\n")
+    logger.info("===========")
 
     cmd = (
         f"venv/bin/python3 rvc_cli.py model_blender "

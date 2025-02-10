@@ -102,9 +102,9 @@ training_file_path = os.path.join(experiment_dir, "training_data.json")
 
 import logging
 
-logging.getLogger("torch").setLevel(logging.ERROR)
+# logging.getLogger("torch").setLevel(logging.ERROR)
 
-logger = get_logger(f"/workspace/rvc-cli/logs/{model_name}/training.log")
+logger = get_logger(os.path.join(experiment_dir, "training.log"))
 logger.info("TRAINING LOG")
 
 # Decorator to log method calls and object state

@@ -27,7 +27,7 @@ logging.getLogger("numba.core.ssa").setLevel(logging.WARNING)
 logging.getLogger("numba.core.interpreter").setLevel(logging.WARNING)
 
 experiment_dir = str(sys.argv[1])
-logger = get_logger(os.path.join(experiment_dir, "/training.log"))
+logger = get_logger(os.path.join(experiment_dir, "training.log"))
 
 # Constants
 OVERLAP = 0.3

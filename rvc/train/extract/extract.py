@@ -33,7 +33,7 @@ mp.set_start_method("spawn", force=True)
 
 experiment_dir = str(sys.argv[1])
 
-logger = get_logger(os.path.join(experiment_dir, "/training.log"))
+logger = get_logger(os.path.join(experiment_dir, "training.log"))
 
 class FeatureInput:
     """Class for F0 extraction."""

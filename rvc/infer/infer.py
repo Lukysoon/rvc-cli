@@ -36,6 +36,7 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 logging.getLogger("faiss").setLevel(logging.WARNING)
 logging.getLogger("faiss.loader").setLevel(logging.WARNING)
 
+from custom_logging import get_logger
 
 class VoiceConverter:
     """
@@ -251,9 +252,10 @@ class VoiceConverter:
             **kwargs: Additional keyword arguments.
         """
         self.get_vc(model_path, sid)
+        logger = get_logger(f"/workspace/rvc-cli/inference.log")
         try:
             start_time = time.time()
-            print(f"Converting audio '{audio_input_path}'...")
+            logger.info(f"Converting audio '{audio_input_path}'...")
 
             if upscale_audio == True:
                 from audio_upscaler import upscale
@@ -287,7 +289,7 @@ class VoiceConverter:
 
             if split_audio:
                 chunks, intervals = process_audio(audio, 16000)
-                print(f"Audio split into {len(chunks)} chunks for processing.")
+                logger.info(f"Audio split into {len(chunks)} chunks for processing.")
             else:
                 chunks = []
                 chunks.append(audio)
@@ -315,7 +317,7 @@ class VoiceConverter:
                 )
                 converted_chunks.append(audio_opt)
                 if split_audio:
-                    print(f"Converted audio chunk {len(converted_chunks)}")
+                    logger.info(f"Converted audio chunks {len(converted_chunks)}")
 
             if split_audio:
                 audio_opt = merge_audio(converted_chunks, intervals, 16000, self.tgt_sr)
@@ -345,12 +347,12 @@ class VoiceConverter:
             )
 
             elapsed_time = time.time() - start_time
-            print(
+            logger.info(
                 f"Conversion completed at '{audio_output_path}' in {elapsed_time:.2f} seconds."
             )
         except Exception as error:
-            print(f"An error occurred during audio conversion: {error}")
-            print(traceback.format_exc())
+            logger.info(f"An error occurred during audio conversion: {error}")
+            logger.info(traceback.format_exc())
 
     def convert_audio_batch(
         self,
@@ -368,6 +370,8 @@ class VoiceConverter:
             sid (int, optional): Speaker ID. Default is 0.
             **kwargs: Additional keyword arguments.
         """
+        logger = get_logger(f"/workspace/rvc-cli/inference.log")
+
         pid = os.getpid()
         try:
             with open(
@@ -375,7 +379,7 @@ class VoiceConverter:
             ) as pid_file:
                 pid_file.write(str(pid))
             start_time = time.time()
-            print(f"Converting audio batch '{audio_input_paths}'...")
+            logger.info(f"Converting audio batch '{audio_input_paths}'...")
             audio_files = [
                 f
                 for f in os.listdir(audio_input_paths)
@@ -397,7 +401,7 @@ class VoiceConverter:
                     )
                 )
             ]
-            print(f"Detected {len(audio_files)} audio files for inference.")
+            logger.info(f"Detected {len(audio_files)} audio files for inference.")
             for a in audio_files:
                 new_input = os.path.join(audio_input_paths, a)
                 new_output = os.path.splitext(a)[0] + "_output.wav"
@@ -409,12 +413,12 @@ class VoiceConverter:
                     audio_output_path=new_output,
                     **kwargs,
                 )
-            print(f"Conversion completed at '{audio_input_paths}'.")
+            logger.info(f"Conversion completed at '{audio_input_paths}'.")
             elapsed_time = time.time() - start_time
-            print(f"Batch conversion completed in {elapsed_time:.2f} seconds.")
+            logger.info(f"Batch conversion completed in {elapsed_time:.2f} seconds.")
         except Exception as error:
-            print(f"An error occurred during audio batch conversion: {error}")
-            print(traceback.format_exc())
+            logger.info(f"An error occurred during audio batch conversion: {error}")
+            logger.info(traceback.format_exc())
         finally:
             os.remove(os.path.join(now_dir, "assets", "infer_pid.txt"))
 

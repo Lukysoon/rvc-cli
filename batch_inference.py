@@ -7,9 +7,8 @@ import logging
 from custom_logging import get_logger
 
 logging.getLogger("torch").setLevel(logging.ERROR)
-logger = get_logger("/workspace/rvc-cli/batch_inference.log")
 
-def run_command(command):
+def run_command(command, logger):
     try:
         process = subprocess.run(
             command,
@@ -35,7 +34,7 @@ def run_batch_infer(
     reverb_dry_gain, reverb_width, reverb_freeze_mode, pitch_shift_semitones, limiter_threshold,
     limiter_release_time, gain_db, distortion_gain, chorus_rate, chorus_depth, chorus_center_delay,
     chorus_feedback, chorus_mix, bitcrush_bit_depth, clipping_threshold, compressor_threshold,
-    compressor_ratio, compressor_attack, compressor_release, delay_seconds, delay_feedback, delay_mix
+    compressor_ratio, compressor_attack, compressor_release, delay_seconds, delay_feedback, delay_mix, logger
 ):    
     logger.info("===BATCH INFER===")
     logger.info(f"pitch {pitch}")
@@ -163,7 +162,7 @@ def run_batch_infer(
         f"--delay_feedback {delay_feedback} "
         f"--delay_mix {delay_mix} "
         )
-    return run_command(cmd)
+    return run_command(cmd, logger)
 
 def run_pipeline(
     pitch: int, 
@@ -227,6 +226,8 @@ def run_pipeline(
     delay_feedback=0.0, 
     delay_mix=0.5
     ):
+    logger = get_logger("/workspace/rvc-cli/batch_inference.log")
+
     logger.info("Starting RVC batch inference...")
 
     if os.listdir(input_dir_path) == []:
@@ -242,6 +243,7 @@ def run_pipeline(
 
     logger.info("Running batch inference...")
     print("Running batch inference...")
+
     if not run_batch_infer(
         pitch, 
         filter_radius, 
@@ -302,11 +304,12 @@ def run_pipeline(
         compressor_release, 
         delay_seconds, 
         delay_feedback, 
-        delay_mix
+        delay_mix,
+        logger
     ):
         return
     
-    remove_string_from_filenames_in_directory(output_dir_path)
+    remove_string_from_filenames_in_directory(output_dir_path, logger)
 
     logger.info(f"Your files are waiting for you at directory '{output_dir_path}'")
     logger.info("Batch inference completed successfully!")
@@ -315,7 +318,7 @@ def run_pipeline(
     print("\nBatch inference completed successfully!")
 
 
-def remove_string_from_filenames_in_directory(directory):
+def remove_string_from_filenames_in_directory(directory, logger):
     # Iterate over all files in the directory
     for filename in os.listdir(directory):
         # Construct the full file path

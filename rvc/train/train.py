@@ -77,7 +77,7 @@ cache_data_in_gpu = strtobool(sys.argv[13])
 overtraining_detector = strtobool(sys.argv[14])
 overtraining_threshold = int(sys.argv[15])
 cleanup = strtobool(sys.argv[16])
-freezing_layers = sys.argv[17]
+# freezing_layers = sys.argv[17]
 
 current_dir = os.getcwd()
 experiment_dir = os.path.join(current_dir, "logs", model_name)
@@ -420,7 +420,7 @@ def run(
         sr=sample_rate,
     ).to(device)
 
-    freeze_layers(net_g, freezing_layers)
+    # freeze_layers(net_g, freezing_layers)
 
     if version == "v1":
         net_d = MultiPeriodDiscriminator(config.model.use_spectral_norm).to(device)

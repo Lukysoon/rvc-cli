@@ -1,7 +1,9 @@
 import os
 import torch
 from collections import OrderedDict
+from custom_logging import get_logger
 
+logger = get_logger(f"/workspace/rvc-cli/blending.log")
 
 def extract(ckpt):
     a = ckpt["model"]
@@ -21,7 +23,7 @@ def model_blender(name, path1, path2, ratio):
         ckpt2 = torch.load(path2, map_location="cpu")
 
         if ckpt1["sr"] != ckpt2["sr"]:
-            return "The sample rates of the two models are not the same."
+            logger.info("The sample rates of the two models are not the same.")
 
         cfg = ckpt1["config"]
         cfg_f0 = ckpt1["f0"]
@@ -38,7 +40,7 @@ def model_blender(name, path1, path2, ratio):
             ckpt2 = ckpt2["weight"]
 
         if sorted(list(ckpt1.keys())) != sorted(list(ckpt2.keys())):
-            return "Fail to merge the models. The model architectures are not the same."
+            logger.info("Fail to merge the models. The model architectures are not the same.")
 
         opt = OrderedDict()
         opt["weight"] = {}
@@ -64,5 +66,5 @@ def model_blender(name, path1, path2, ratio):
         print(message)
         return message, os.path.join("logs", f"{name}.pth")
     except Exception as error:
-        print(f"An error occurred blending the models: {error}")
+        logger.info(f"An error occurred blending the models: {error}")
         return error

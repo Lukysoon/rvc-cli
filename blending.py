@@ -38,7 +38,7 @@ def run_infer(model_name, pth_path_1, pth_path_2, ratio, logger):
     return run_command(cmd, logger)
 
 def run_pipeline(model_name: str, pth_path_1: str, pth_path_2: str, ratio: float):
-    logger = get_logger(f"/workspace/rvc-cli/logs/{model_name}/training.log")
+    logger = get_logger(f"/workspace/rvc-cli/blending.log")
     logger.info("Starting RVC Blending...")
     
     if pth_path_1 == "pth_path_1.pth":

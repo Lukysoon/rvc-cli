@@ -535,6 +535,7 @@ def run_train_script(
     custom_pretrained: bool = False,
     g_pretrained_path: str = None,
     d_pretrained_path: str = None,
+    freezing_layers: str = None,
 ):
 
     if pretrained == True:
@@ -576,6 +577,7 @@ def run_train_script(
                 overtraining_detector,
                 overtraining_threshold,
                 cleanup,
+                freezing_layers,
             ],
         ),
     ]
@@ -2150,6 +2152,13 @@ def parse_arguments():
         default="Auto",
         required=False,
     )
+    train_parser.add_argument(
+        "--freezing_layers",
+        type=str,
+        help="Choose the which layers should be freezed. Comma separated.",
+        default=None,
+        required=False,
+    )
 
     # Parser for 'index' mode
     index_parser = subparsers.add_parser(
@@ -2534,6 +2543,7 @@ def main():
                 cache_data_in_gpu=args.cache_data_in_gpu,
                 g_pretrained_path=args.g_pretrained_path,
                 d_pretrained_path=args.d_pretrained_path,
+                freezing_layers=args.freezing_layers
             )
         elif args.mode == "index":
             run_index_script(

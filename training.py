@@ -94,7 +94,7 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     return run_command(cmd, logger)
 
 # Train command
-def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector=False, overtraining_threshold=50):
+def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector=False, overtraining_threshold=50, freezing_layers=None):
 
     pretrained = True
     if g_pretrained_path == "" or d_pretrained_path == "":
@@ -131,6 +131,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
     logger.info(f"overtraining_threshold {overtraining_threshold}")
     logger.info(f"cache_data_in_gpu {cache_data_in_gpu}")
     logger.info(f"index_algorithm {index_algorithm}")
+    logger.info(f"freezing_layers {freezing_layers}")
     logger.info("===========")
 
     cmd = (
@@ -153,6 +154,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
         f"--overtraining_threshold {overtraining_threshold} "
         f"--cache_data_in_gpu {cache_data_in_gpu} "
         f"--index_algorithm {index_algorithm} "
+        f"--freezing_layers {freezing_layers} "
     )
     return run_command(cmd, logger)
 
@@ -171,7 +173,8 @@ def run_pipeline(
     noise_reduction_strength: float=0.7, 
     overtraining_detector: bool=False, 
     overtraining_threshold: int=50, 
-    hop_size: int=160):
+    hop_size: int=160,
+    freezing_layers: str=None):
 
     # create experiment directory
     Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
@@ -199,7 +202,7 @@ def run_pipeline(
     
     logger.info("3. Running training...")
     print("3. Running training...")
-    if not run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold):
+    if not run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold, freezing_layers):
         return
     
     logger.info("Pipeline completed successfully!")

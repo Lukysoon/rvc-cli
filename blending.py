@@ -20,7 +20,7 @@ def run_command(command, logger):
         logger.info(f"Error output: {e.stderr}")
         raise Exception(e.stderr)
 
-def run_infer(model_name, pth_path_1, pth_path_2, ratio, logger):
+def run_blending(model_name, pth_path_1, pth_path_2, ratio, logger):
     logger.info("===BLEND===")
     logger.info(f"model_name {model_name}")
     logger.info(f"pth_path_1 {pth_path_1}")
@@ -52,7 +52,7 @@ def run_pipeline(model_name: str, pth_path_1: str, pth_path_2: str, ratio: float
 
     logger.info("Running blending...")
     print("Running blending...")
-    if not run_infer(model_name, pth_path_1, pth_path_2, ratio, logger):
+    if not run_blending(model_name, pth_path_1, pth_path_2, ratio, logger):
         return
     
     logger.info(f"Blended file was saved to '{os.path.join('logs', model_name + '.pth')}'")

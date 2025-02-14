@@ -420,7 +420,7 @@ def run(
         sr=sample_rate,
     ).to(device)
 
-    # freeze_layers(net_g, freezing_layers)
+    freeze_layers(net_g, freezing_layers)
 
     if version == "v1":
         net_d = MultiPeriodDiscriminator(config.model.use_spectral_norm).to(device)

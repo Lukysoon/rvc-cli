@@ -24,6 +24,7 @@ def model_blender(name, path1, path2, ratio):
 
         if ckpt1["sr"] != ckpt2["sr"]:
             logger.info("The sample rates of the two models are not the same.")
+            raise Exception("The sample rates of the two models are not the same.")
 
         cfg = ckpt1["config"]
         cfg_f0 = ckpt1["f0"]
@@ -41,6 +42,7 @@ def model_blender(name, path1, path2, ratio):
 
         if sorted(list(ckpt1.keys())) != sorted(list(ckpt2.keys())):
             logger.info("Fail to merge the models. The model architectures are not the same.")
+            raise Exception("Fail to merge the models. The model architectures are not the same.")
 
         opt = OrderedDict()
         opt["weight"] = {}
@@ -67,4 +69,4 @@ def model_blender(name, path1, path2, ratio):
         return message, os.path.join("logs", f"{name}.pth")
     except Exception as error:
         logger.info(f"An error occurred blending the models: {error}")
-        return error
+        raise Exception(f"An error occurred blending the models: {error}")

@@ -174,6 +174,7 @@ def run_pipeline(
     overtraining_detector: bool=False, 
     overtraining_threshold: int=50, 
     hop_size: int=160,
+    freezing_layers: str=None,
     skip_preprocessing=False,
     skip_extraction=False,
     skip_training=False):
@@ -211,7 +212,7 @@ def run_pipeline(
     if skip_training == False:
         logger.info("3. Running training...")
         print("3. Running training...")
-        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold)
+        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold, freezing_layers)
     else:
         logger.info("3. Skipping training...")
         print("3. Skipping training...")

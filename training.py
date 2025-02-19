@@ -193,16 +193,17 @@ def run_pipeline(
     if pretrained_path != "":
         g_pretrained_path = os.path.join(pretrained_path, 'G.pth')
         d_pretrained_path = os.path.join(pretrained_path, 'D.pth')
+        
+        if not os.path.isfile(g_pretrained_path):
+            raise Exception("G.pth file does not exists: ", g_pretrained_path)
+        
+        if not os.path.isfile(d_pretrained_path):
+            raise Exception("D.pth file does not exists: ", d_pretrained_path)
     else:
         g_pretrained_path = ""
         d_pretrained_path = ""
 
 
-    if not os.path.isfile(g_pretrained_path):
-        raise Exception("G.pth file does not exists: ", g_pretrained_path)
-    
-    if not os.path.isfile(d_pretrained_path):
-        raise Exception("D.pth file does not exists: ", d_pretrained_path)
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")

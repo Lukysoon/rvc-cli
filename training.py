@@ -163,8 +163,7 @@ def run_pipeline(
     save_every_epoch: int, 
     total_epoch: int, 
     batch_size: int, 
-    g_pretrained_path: str, 
-    d_pretrained_path: str, 
+    pretrained_path: str = "", 
     cut_preprocess: bool=True, 
     process_effects: bool=True,
     noise_reduction: bool=False, 
@@ -183,9 +182,18 @@ def run_pipeline(
 
     logger.info("Starting RVC pipeline...")
     
-    if ((g_pretrained_path != "" and not os.path.isfile(g_pretrained_path)) or 
-        (d_pretrained_path != "" and not os.path.isfile(d_pretrained_path))):
-        raise Exception("The file at path 'g_pretrained_path' or 'd_pretrained_path' doesn't exist.")
+    # If a single path is provided and it's a directory, look for G.pth and D.pth
+    if not pretrained_path and not os.path.isdir(pretrained_path):
+        raise Exception("Directory with pretrained does not exists.")
+    
+    g_pretrained_path = os.path.join(pretrained_path, 'G.pth')
+    d_pretrained_path = os.path.join(pretrained_path, 'D.pth')
+    
+    if not os.path.isfile(g_pretrained_path):
+        raise Exception("G.pth file does not exists: ", g_pretrained_path)
+    
+    if not os.path.isfile(d_pretrained_path):
+        raise Exception("D.pth file does not exists: ", d_pretrained_path)
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
@@ -209,6 +217,7 @@ def run_pipeline(
     if skip_training == False:
         logger.info("3. Running training...")
         print("3. Running training...")
+
         run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold)
     else:
         logger.info("3. Skipping training...")

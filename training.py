@@ -163,7 +163,7 @@ def run_pipeline(
     save_every_epoch: int, 
     total_epoch: int, 
     batch_size: int, 
-    pretrained_path: str = "", 
+    pretrained_path: str, 
     cut_preprocess: bool=True, 
     process_effects: bool=True,
     noise_reduction: bool=False, 

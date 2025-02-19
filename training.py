@@ -182,6 +182,10 @@ def run_pipeline(
 
     logger.info("Starting RVC pipeline...")
     
+    dataset_dir = os.path.join("datasets", model_name)
+    if not os.path.isdir(dataset_dir):
+        raise Exception(dataset_dir, " does not exists.")
+
     # If a single path is provided and it's a directory, look for G.pth and D.pth
     if not pretrained_path and not os.path.isdir(pretrained_path):
         raise Exception("Directory with pretrained does not exists.")

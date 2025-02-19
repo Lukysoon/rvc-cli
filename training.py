@@ -187,12 +187,17 @@ def run_pipeline(
         raise Exception(dataset_dir, " does not exists.")
 
     # If a single path is provided and it's a directory, look for G.pth and D.pth
-    if not pretrained_path and not os.path.isdir(pretrained_path):
+    if pretrained_path != "" and not os.path.isdir(pretrained_path):
         raise Exception("Directory with pretrained does not exists.")
     
-    g_pretrained_path = os.path.join(pretrained_path, 'G.pth')
-    d_pretrained_path = os.path.join(pretrained_path, 'D.pth')
-    
+    if pretrained_path != "":
+        g_pretrained_path = os.path.join(pretrained_path, 'G.pth')
+        d_pretrained_path = os.path.join(pretrained_path, 'D.pth')
+    else:
+        g_pretrained_path = ""
+        d_pretrained_path = ""
+
+
     if not os.path.isfile(g_pretrained_path):
         raise Exception("G.pth file does not exists: ", g_pretrained_path)
     

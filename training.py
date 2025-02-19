@@ -94,7 +94,7 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     return run_command(cmd, logger)
 
 # Train command
-def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector=False, overtraining_threshold=50):
+def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold, save_only_latest):
 
     pretrained = True
     if g_pretrained_path == "" or d_pretrained_path == "":
@@ -104,7 +104,6 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
     
     rvc_version = "v2"
     sample_rate = 48000
-    save_only_latest = False
     save_every_weights = True
     gpu = 0
     pitch_guidance = True
@@ -164,6 +163,7 @@ def run_pipeline(
     total_epoch: int, 
     batch_size: int, 
     pretrained_path: str, 
+    save_only_latest: bool = False,
     cut_preprocess: bool=True, 
     process_effects: bool=True,
     noise_reduction: bool=False, 
@@ -227,7 +227,7 @@ def run_pipeline(
         logger.info("3. Running training...")
         print("3. Running training...")
 
-        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold)
+        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold, save_only_latest)
     else:
         logger.info("3. Skipping training...")
         print("3. Skipping training...")

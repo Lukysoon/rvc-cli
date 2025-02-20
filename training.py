@@ -94,7 +94,7 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     return run_command(cmd, logger)
 
 # Train command
-def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector=False, overtraining_threshold=50, freezing_layers=None):
+def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, freezing_layers, overtraining_detector, overtraining_threshold):
 
     pretrained = True
     if g_pretrained_path == "" or d_pretrained_path == "":
@@ -174,7 +174,7 @@ def run_pipeline(
     overtraining_detector: bool=False, 
     overtraining_threshold: int=50, 
     hop_size: int=160,
-    freezing_layers: str=None,
+    freezing_layers=None,
     skip_preprocessing=False,
     skip_extraction=False,
     skip_training=False):
@@ -212,7 +212,7 @@ def run_pipeline(
     if skip_training == False:
         logger.info("3. Running training...")
         print("3. Running training...")
-        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold, freezing_layers)
+        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, freezing_layers, overtraining_detector, overtraining_threshold)
     else:
         logger.info("3. Skipping training...")
         print("3. Skipping training...")

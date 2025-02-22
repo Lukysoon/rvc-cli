@@ -58,7 +58,7 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
     return run_command(cmd, logger)
 
 # Extract command
-def run_extract(model_name, cpu_cores, hop_size, logger):
+def run_extract(model_name, cpu_cores, hop_size, logger, custom_embedder_model_path):
 
     rvc_version = "v2"
     f0_method = "rmvpe"
@@ -66,6 +66,9 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     gpu = 0
     sample_rate = 48000
     embedder_model = "contentvec"
+
+    if custom_embedder_model_path:
+        embedder_model = "custom"
 
     logger.info("===EXTRACT FEATURES===")
     logger.info(f"model_name {model_name}")
@@ -77,6 +80,7 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     logger.info(f"gpu {gpu}")
     logger.info(f"sample_rate {sample_rate}")
     logger.info(f"embedder_model {embedder_model}")
+    logger.info(f"embedder_model_custom {custom_embedder_model_path}")
     logger.info("=====================")
 
     cmd = (
@@ -90,6 +94,7 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
         f"--gpu {gpu} "
         f"--sample_rate {sample_rate} "
         f"--embedder_model {embedder_model} "
+        f"--embedder_model_custom {custom_embedder_model_path}"
     )
     return run_command(cmd, logger)
 
@@ -153,6 +158,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
         f"--cache_data_in_gpu {cache_data_in_gpu} "
         f"--index_algorithm {index_algorithm} "
         f"--freezing_layers {freezing_layers} "
+        f"--freezing_layers {freezing_layers} "
     )
     return run_command(cmd, logger)
 
@@ -175,7 +181,8 @@ def run_pipeline(
     freezing_layers=None,
     skip_preprocessing=False,
     skip_extraction=False,
-    skip_training=False):
+    skip_training=False,
+    custom_embedder_model_path=None):
 
     # create experiment directory
     Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
@@ -205,7 +212,8 @@ def run_pipeline(
         g_pretrained_path = ""
         d_pretrained_path = ""
 
-
+    if custom_embedder_model_path is not None and not os.path.isdir(custom_embedder_model_path):
+        raise Exception(f"Path to the custom embedder '{custom_embedder_model_path}' does not exists.")
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
@@ -221,7 +229,7 @@ def run_pipeline(
     if skip_extraction == False:
         logger.info("2. Running feature extraction...")
         print("2. Running feature extraction...")
-        run_extract(model_name, cpu_cores, hop_size, logger)
+        run_extract(model_name, cpu_cores, hop_size, logger, custom_embedder_model_path)
     else:
         logger.info("2. Skipping feature extraction...")
         print("2. Skipping feature extraction...")

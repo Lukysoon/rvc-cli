@@ -228,8 +228,8 @@ def run_pipeline(
     if not os.path.isfile(input_path):
         raise Exception(f"File {input_path} doesn't exists.")
 
-    if pth_path == "path-to-pth-file.pth":
-        raise Exception("Change 'path-to-pth-file.pth' to something else.")
+    if not os.path.isfile(pth_path):
+        raise Exception(f"File {pth_path} doesn't exists.")
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install the app. Run these scripts please:\nchmod +x install.sh\n./install.sh")

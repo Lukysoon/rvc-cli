@@ -750,8 +750,8 @@ def train_and_evaluate(
         # INSERTED
         epoch_duration = time.time() - epoch_start
         slog = f"\n  Epoch {epoch} | duration {epoch_duration} \n  ---------"
-        for k in scalar_dict:
-            slog += f"\n  {k}: {scalar_dict[k]}"
+        # for k in scalar_dict:
+        #     slog += f"\n  {k}: {scalar_dict[k]}"
         logger.info(slog)
         # ================================
         # commented out

@@ -28,10 +28,12 @@ def run_command(command, logger):
 
 
 # Preprocess command
-def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger):
-    
+def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger, custom_dataset_path):
+
     sample_rate = 48000
     dataset_path = os.path.join("datasets", model_name)
+    if custom_dataset_path != "":
+        dataset_path = custom_dataset_path
 
     logger.info("===PREPROCESS==")
     logger.info(f"model_name {model_name}")
@@ -182,7 +184,8 @@ def run_pipeline(
     skip_preprocessing=False,
     skip_extraction=False,
     skip_training=False,
-    custom_embedder_model_path=None):
+    custom_embedder_model_path=None,
+    custom_dataset_path=""):
 
     # create experiment directory
     Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
@@ -221,7 +224,7 @@ def run_pipeline(
     if skip_preprocessing == False:
         logger.info("1. Running preprocessing...")
         print("1. Running preprocessing...")
-        run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger)
+        run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger, custom_dataset_path)
     else:
         logger.info("1. Skipping preprocessing...")
         print("1. Skipping preprocessing...")

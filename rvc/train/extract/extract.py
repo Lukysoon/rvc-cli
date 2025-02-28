@@ -182,6 +182,10 @@ def process_file_embedding(
     files, version, embedder_model, embedder_model_custom, device_num, device, n_threads
 ):
     dtype = torch.float16 if config.is_half and "cuda" in device else torch.float32
+    
+    logger.info("embedder_model_custom: ", embedder_model_custom)
+    logger.info("embedder_model: ", embedder_model)
+
     model = load_embedding(embedder_model, embedder_model_custom).to(dtype).to(device)
     n_threads = 1 if n_threads == 0 else n_threads
 

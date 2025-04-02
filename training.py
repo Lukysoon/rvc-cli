@@ -28,10 +28,12 @@ def run_command(command, logger):
 
 
 # Preprocess command
-def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger):
-    
+def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger, custom_dataset_path):
+
     sample_rate = 48000
     dataset_path = os.path.join("datasets", model_name)
+    if custom_dataset_path != "":
+        dataset_path = custom_dataset_path
 
     logger.info("===PREPROCESS==")
     logger.info(f"model_name {model_name}")
@@ -58,7 +60,7 @@ def run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise
     return run_command(cmd, logger)
 
 # Extract command
-def run_extract(model_name, cpu_cores, hop_size, logger):
+def run_extract(model_name, cpu_cores, hop_size, logger, custom_embedder_model_path):
 
     rvc_version = "v2"
     f0_method = "rmvpe"
@@ -66,6 +68,9 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     gpu = 0
     sample_rate = 48000
     embedder_model = "contentvec"
+
+    if custom_embedder_model_path:
+        embedder_model = "custom"
 
     logger.info("===EXTRACT FEATURES===")
     logger.info(f"model_name {model_name}")
@@ -77,6 +82,7 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
     logger.info(f"gpu {gpu}")
     logger.info(f"sample_rate {sample_rate}")
     logger.info(f"embedder_model {embedder_model}")
+    logger.info(f"embedder_model_custom {custom_embedder_model_path}")
     logger.info("=====================")
 
     cmd = (
@@ -90,12 +96,12 @@ def run_extract(model_name, cpu_cores, hop_size, logger):
         f"--gpu {gpu} "
         f"--sample_rate {sample_rate} "
         f"--embedder_model {embedder_model} "
+        f"--embedder_model_custom {custom_embedder_model_path}"
     )
     return run_command(cmd, logger)
 
 # Train command
-def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold, save_only_latest):
-
+def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, freezing_layers, overtraining_detector, overtraining_threshold, save_only_latest):
     pretrained = True
     if g_pretrained_path == "" or d_pretrained_path == "":
         logger.info("g_pretrained_path or d_pretrained_path is null")
@@ -130,6 +136,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
     logger.info(f"overtraining_threshold {overtraining_threshold}")
     logger.info(f"cache_data_in_gpu {cache_data_in_gpu}")
     logger.info(f"index_algorithm {index_algorithm}")
+    logger.info(f"freezing_layers {freezing_layers}")
     logger.info("===========")
 
     cmd = (
@@ -152,6 +159,7 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
         f"--overtraining_threshold {overtraining_threshold} "
         f"--cache_data_in_gpu {cache_data_in_gpu} "
         f"--index_algorithm {index_algorithm} "
+        f"--freezing_layers {freezing_layers} "
     )
     return run_command(cmd, logger)
 
@@ -171,9 +179,12 @@ def run_pipeline(
     overtraining_detector: bool=False, 
     overtraining_threshold: int=50, 
     hop_size: int=160,
+    freezing_layers=None,
     skip_preprocessing=False,
     skip_extraction=False,
-    skip_training=False):
+    skip_training=False,
+    custom_embedder_model_path=None,
+    custom_dataset_path=""):
 
     # create experiment directory
     Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
@@ -203,7 +214,8 @@ def run_pipeline(
         g_pretrained_path = ""
         d_pretrained_path = ""
 
-
+    if custom_embedder_model_path is not None and not os.path.isdir(custom_embedder_model_path):
+        raise Exception(f"Path to the custom embedder '{custom_embedder_model_path}' does not exists.")
 
     if not os.path.exists("venv"):
         raise Exception("It seems that you didn't install app. Run these scripts please:\nchmod +x install.sh\n./install.sh")
@@ -211,7 +223,7 @@ def run_pipeline(
     if skip_preprocessing == False:
         logger.info("1. Running preprocessing...")
         print("1. Running preprocessing...")
-        run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger)
+        run_preprocess(model_name, cpu_cores, cut_preprocess, process_effects, noise_reduction, noise_reduction_strength, logger, custom_dataset_path)
     else:
         logger.info("1. Skipping preprocessing...")
         print("1. Skipping preprocessing...")
@@ -219,7 +231,7 @@ def run_pipeline(
     if skip_extraction == False:
         logger.info("2. Running feature extraction...")
         print("2. Running feature extraction...")
-        run_extract(model_name, cpu_cores, hop_size, logger)
+        run_extract(model_name, cpu_cores, hop_size, logger, custom_embedder_model_path)
     else:
         logger.info("2. Skipping feature extraction...")
         print("2. Skipping feature extraction...")
@@ -227,8 +239,7 @@ def run_pipeline(
     if skip_training == False:
         logger.info("3. Running training...")
         print("3. Running training...")
-
-        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, overtraining_detector, overtraining_threshold, save_only_latest)
+        run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretrained_path, d_pretrained_path, logger, freezing_layers, overtraining_detector, overtraining_threshold, save_only_latest)
     else:
         logger.info("3. Skipping training...")
         print("3. Skipping training...")

@@ -77,6 +77,7 @@ cache_data_in_gpu = strtobool(sys.argv[13])
 overtraining_detector = strtobool(sys.argv[14])
 overtraining_threshold = int(sys.argv[15])
 cleanup = strtobool(sys.argv[16])
+freezing_layers = sys.argv[17]
 
 current_dir = os.getcwd()
 experiment_dir = os.path.join(current_dir, "logs", model_name)
@@ -164,6 +165,43 @@ def verify_checkpoint_shapes(checkpoint_path, model):
         del checkpoint_state_dict
         del model_state_dict
 
+def freeze_layers(net_g, freezing_layers=None):
+    """
+    Freeze specified layers of the generator model.
+
+    Args:
+        net_g (Synthesizer): The generator model.
+        freezing_layers (string, optional): Commasepareted list of layer names to freeze. 
+        Possible values: 'enc_p', 'dec', 'enc_q', 'flow', 'emb_g'
+    """
+
+    freezing_layers = freezing_layers.split(',')
+
+    try:
+
+        if freezing_layers is None:
+            return
+
+        layer_map = {
+            'enc_p': net_g.enc_p,
+            'dec': net_g.dec,
+            'enc_q': net_g.enc_q,
+            'flow': net_g.flow,
+            'emb_g': net_g.emb_g
+        }
+
+        for layer_name in freezing_layers:
+            if layer_name not in layer_map:
+                logger.info(f"Layer {layer_name} not found in the model. Skipping.")
+                continue
+            
+            layer = layer_map[layer_name]
+            for param in layer.parameters():
+                param.requires_grad = False
+            logger.info(f"Frozen layer: {layer_name}")
+
+    except Exception as e:
+        logger.info(f"An error during freezing layers occured: {e}")
 
 def main():
     """
@@ -381,6 +419,8 @@ def run(
         is_half=config.train.fp16_run and device.type == "cuda",
         sr=sample_rate,
     ).to(device)
+
+    freeze_layers(net_g, freezing_layers)
 
     if version == "v1":
         net_d = MultiPeriodDiscriminator(config.model.use_spectral_norm).to(device)

@@ -70,7 +70,7 @@ try:
 
         # index_added
         index_added = faiss.index_factory(
-            256 if version == "v1" else 768, f"IVF{n_ivf},Flat"
+            256 if version == "v1" else 1024, f"IVF{n_ivf},Flat"
         )
         index_ivf_added = faiss.extract_index_ivf(index_added)
         index_ivf_added.nprobe = 1

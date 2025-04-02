@@ -160,7 +160,6 @@ def run_train(model_name, save_every_epoch, total_epoch, batch_size, g_pretraine
         f"--cache_data_in_gpu {cache_data_in_gpu} "
         f"--index_algorithm {index_algorithm} "
         f"--freezing_layers {freezing_layers} "
-        f"--freezing_layers {freezing_layers} "
     )
     return run_command(cmd, logger)
 

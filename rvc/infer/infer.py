@@ -480,7 +480,7 @@ class VoiceConverter:
             self.use_f0 = self.cpt.get("f0", 1)
 
             self.version = self.cpt.get("version", "v1")
-            self.text_enc_hidden_dim = 1024 if self.version == "v2" else 256
+            self.text_enc_hidden_dim = 1280 if self.version == "v2" else 256
             self.net_g = Synthesizer(
                 *self.cpt["config"],
                 use_f0=self.use_f0,

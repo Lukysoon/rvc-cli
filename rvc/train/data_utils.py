@@ -95,10 +95,10 @@ class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
             pitch (str): Path to pitch label file.
             pitchf (str): Path to pitchf label file.
         """
-        phone = np.load(phone)
+        phone = np.load(phone, allow_pickle=True)
         phone = np.repeat(phone, 2, axis=0)
-        pitch = np.load(pitch)
-        pitchf = np.load(pitchf)
+        pitch = np.load(pitch, allow_pickle=True)
+        pitchf = np.load(pitchf, allow_pickle=True)
         n_num = min(phone.shape[0], 900)
         phone = phone[:n_num, :]
         pitch = pitch[:n_num]

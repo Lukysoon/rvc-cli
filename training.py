@@ -176,9 +176,9 @@ def run_pipeline(
     skip_training=False):
 
     # create experiment directory
-    Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
+    Path(f"/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
 
-    log_filename = f"/workspace/rvc-cli/logs/{model_name}/training.log"
+    log_filename = f"/rvc-cli/logs/{model_name}/training.log"
 
     if not os.path.exists(log_filename):
         os.mknod(log_filename)

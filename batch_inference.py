@@ -227,7 +227,7 @@ def run_pipeline(
     delay_mix=0.5
     ):
 
-    log_filename = "/workspace/rvc-cli/batch_inference.log"
+    log_filename = "/rvc-cli/batch_inference.log"
 
     if not os.path.exists(log_filename):
         os.mknod(log_filename)

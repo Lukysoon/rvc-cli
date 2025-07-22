@@ -178,7 +178,12 @@ def run_pipeline(
     # create experiment directory
     Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
 
-    logger = get_logger(f"/workspace/rvc-cli/logs/{model_name}/training.log")
+    log_filename = f"/workspace/rvc-cli/logs/{model_name}/training.log"
+
+    if not os.path.exists(log_filename):
+        os.mknod(log_filename)
+
+    logger = get_logger(log_filename)
 
     logger.info("Starting RVC pipeline...")
     

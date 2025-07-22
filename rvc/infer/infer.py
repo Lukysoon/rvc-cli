@@ -252,7 +252,13 @@ class VoiceConverter:
             **kwargs: Additional keyword arguments.
         """
         self.get_vc(model_path, sid)
-        logger = get_logger(f"/workspace/rvc-cli/inference.log")
+
+        log_filename = "/workspace/rvc-cli/inference.log"
+
+        if not os.path.exists(log_filename):
+            os.mknod(log_filename)
+
+        logger = get_logger(log_filename)
         try:
             start_time = time.time()
             logger.info(f"Converting audio '{audio_input_path}'...")
@@ -370,7 +376,13 @@ class VoiceConverter:
             sid (int, optional): Speaker ID. Default is 0.
             **kwargs: Additional keyword arguments.
         """
-        logger = get_logger(f"/workspace/rvc-cli/inference.log")
+
+        log_filename = "/workspace/rvc-cli/inference.log"
+
+        if not os.path.exists(log_filename):
+            os.mknod(log_filename)
+
+        logger = get_logger(log_filename)
 
         pid = os.getpid()
         try:

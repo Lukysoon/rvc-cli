@@ -221,7 +221,12 @@ def run_pipeline(
     delay_mix=0.5
     ):
 
-    logger = get_logger(f"/workspace/rvc-cli/inference.log")
+    log_filename = "/workspace/rvc-cli/inference.log"
+
+    if not os.path.exists(log_filename):
+        os.mknod(log_filename)
+
+    logger = get_logger(log_filename)
 
     logger.info("Starting RVC inference...")
 

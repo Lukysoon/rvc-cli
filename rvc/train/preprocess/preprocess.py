@@ -31,6 +31,7 @@ experiment_dir = str(sys.argv[1])
 log_filename = os.path.join(experiment_dir, "training.log")
 
 if not os.path.exists(log_filename):
+    os.makedirs(experiment_dir, exist_ok=True)
     os.mknod(log_filename)
 
 logger = get_logger(log_filename)

@@ -3,7 +3,7 @@ import torch
 from collections import OrderedDict
 from custom_logging import get_logger
 
-logger = get_logger(f"/rvc-cli/blending.log")
+logger = get_logger(f"blending.log")
 
 def extract(ckpt):
     a = ckpt["model"]

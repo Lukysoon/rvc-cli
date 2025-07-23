@@ -253,7 +253,7 @@ class VoiceConverter:
         """
         self.get_vc(model_path, sid)
 
-        log_filename = "/rvc-cli/inference.log"
+        log_filename = "inference.log"
 
         if not os.path.exists(log_filename):
             os.mknod(log_filename)
@@ -377,7 +377,7 @@ class VoiceConverter:
             **kwargs: Additional keyword arguments.
         """
 
-        log_filename = "/rvc-cli/inference.log"
+        log_filename = "inference.log"
 
         if not os.path.exists(log_filename):
             os.mknod(log_filename)

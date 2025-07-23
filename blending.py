@@ -38,7 +38,8 @@ def run_blending(model_name, pth_path_1, pth_path_2, ratio, logger):
     return run_command(cmd, logger)
 
 def run_pipeline(model_name: str, pth_path_1: str, pth_path_2: str, ratio: float):
-    log_filename = "/workspace/rvc-cli/blending.log"
+    
+    log_filename = "blending.log"
 
     if not os.path.exists(log_filename):
         os.mknod(log_filename)

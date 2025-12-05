@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Code Repositories Information" id="Code-Repo-Information">
+
+    <chapter title="Repositories">
+        <p>We use the following repositories:</p>
+        <list type="bullet">
+            <li>public repository <a href="https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI">Retrieval-based-Voice-Conversion-WebUI</a>: the main source of code for retrival-based voice conversion</li>
+            <li>private <a href="https://github.com/ryurchik/voicerary-api">voicerary-api</a> with limited access</li>
+            <li>private <a href="https://github.com/ryurchik/voicerary-cloudflare">voicerary-cloudflare</a> with limited access</li>
+            <li>private <a href="https://github.com/jhalaga/voicerary-app.git">voicerary-app</a> with limited access</li>
+            <li>private <a href="https://github.com/jhalaga/virtual-technician.git">virtual-audio-technician</a> with limited access</li>
+            <li>private <a href="https://github.com/tan-silliksaar/Voicerary">Voicerary Main Site</a> with limited access</li>
+        </list>
+    </chapter>
+</topic>

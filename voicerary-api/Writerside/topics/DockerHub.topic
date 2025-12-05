@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="DockerHub" id="DockerHub">
+    <show-structure for="chapter,procedure" depth="2"/>
+    <chapter title="Why DockerHub?" id="why_docker_hub_">
+        <p>
+            To run our <a href="https://github.com/ryurchik/voicerary-api">voice conversion code</a>,
+            we need to pack it into a Docker image that our
+            <a href="RunPod-Serverless-API-Endpoint.topic">RunPod API Endpoint</a> will use.
+            To do so, we're using a private Docker Hub registry, and we host three custom images there.
+        </p>
+    </chapter>
+    <chapter title="DockerHub images that we use" id="docker_hub_image_use">
+        <deflist>
+            <def title="rvc-runtime">
+                <list type="bullet">
+                    <li><a href="https://hub.docker.com/repository/docker/ryurchik/rvc-runtime">
+                        DockerHub link</a></li>
+                    <li>Based on <control>nvidia/cuda</control> image</li>
+                    <li>Has all python dependencies required for voice conversion</li>
+                    <li><control>Does not contain</control> application code</li>
+                    <li>See <a href="https://github.com/ryurchik/voicerary-api/blob/main/Dockerfile.runpod">
+                        Dockerfile.runpod</a> for more details</li>
+                </list>
+            </def>
+            <def title="voicerary">
+                <list type="bullet">
+                    <li><a href="https://hub.docker.com/repository/docker/ryurchik/voicerary">
+                        DockerHub link</a></li>
+                    <li>Based on <control>rvc-runtime</control> image</li>
+                    <li>Has <a href="https://github.com/ryurchik/voicerary-api">voicerary-api</a> code</li>
+                    <li><control>Does not contain</control> models and indexes from <a href="Cloud-Storage.topic#rvc_models">rvc-models</a> bucket</li>
+                    <li>See <a href="https://github.com/ryurchik/voicerary-api/blob/main/Dockerfile.production">
+                        Dockerfile.production</a> for more details</li>
+                </list>
+                <warning title="Important Note">
+                    <p>RunPod documentation recommends including everything we need into a final docker image.
+                        That worked, but then we found three issues:</p>
+                    <list type="decimal">
+                        <li>image size grows over time as we add more new models</li>
+                        <li>cold start time also becomes longer</li>
+                        <li>practical limit for image size according to RunPod docs is about 15–20Gb,
+                        and at some point in future our image could cross that threshold
+                            and lead to poor performance</li>
+                    </list>
+                    <p>So we decided to use another approach:
+                        <control>download models and indexes on demand at runtime</control>.</p>
+                </warning>
+            </def>
+            <def title="rvc-training">
+                <list type="bullet">
+                    <li><a href="https://hub.docker.com/repository/docker/ryurchik/rvc-training">
+                        DockerHub link</a></li>
+                    <li>Optional image to help with the model training process in RunPod</li>
+                    <li>Based on <control>runpod/pytorch</control> image</li>
+                    <li>See <a href="https://github.com/ryurchik/voicerary-api/blob/main/Dockerfile.training">
+                        Dockerfile.training</a> for more details</li>
+                </list>
+            </def>
+        </deflist>
+        <tip title="Related topic">
+            <a href="How-to-update-a-Docker-image.topic">How to update Docker image</a>
+        </tip>
+    </chapter>
+<!--    <seealso>-->
+<!--        <category ref="related">-->
+<!--            <a href="How-to-update-a-Docker-image.topic">Update Docker Image</a>-->
+<!--        </category>-->
+<!--    </seealso>-->
+</topic>

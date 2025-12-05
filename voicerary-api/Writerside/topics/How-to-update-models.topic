@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="How to release models updates" id="How-to-update-models">
+    <show-structure for="chapter,procedure" depth="2"/>
+    <tldr>
+        <p>Upload model file and optional index</p>
+        <p>Create a model metadata record in the database</p>
+    </tldr>
+
+    <chapter title="Before you start" id="before">
+        <p>Make sure that:</p>
+        <list>
+            <li>you can upload files to the <a
+                    href="https://dash.cloudflare.com/35ffb8490e28826a7367c73da57f6afc/r2/default/buckets/rvc-models">rvc-models</a>
+                R2 bucket
+            </li>
+            <li>you have access to the <a
+                    href="https://dash.cloudflare.com/35ffb8490e28826a7367c73da57f6afc/workers/d1/databases/4659cd59-91d2-4195-a29c-43300c93e0ef">voicerary-db</a>
+                D1 database
+            </li>
+        </list>
+    </chapter>
+
+    <chapter title="How to add/update a model/index files" id="how-to">
+        <procedure id="steps-sequence" title="Upload needed files">
+            <step>
+                <p>Using web-interface, upload files to the <a
+                        href="https://dash.cloudflare.com/35ffb8490e28826a7367c73da57f6afc/r2/default/buckets/rvc-models">
+                    rvc-models</a> bucket:
+                </p>
+                <list>
+                    <li>
+                        <p>put a model file to <code>models/</code> folder and name it
+                            <code>{VoiceName}.pth</code></p>
+                        <tip title="Example">
+                            <code>Patrizia.pth</code>
+                        </tip>
+                    </li>
+                    <li>
+                        <p>Index file is optional. If you have it, put it to <code>models/</code> folder
+                            and name it <code>{VoiceName}.index</code></p>
+                        <tip title="Example">
+                            <code>Patrizia.index</code>
+                        </tip>
+                    </li>
+                </list>
+                <note title="How to upload large files">
+                    For files larger than <control>300Mb</control> follow
+                    <a anchor="how_to_upload_large_files_to_r_2_with_aws_cli">these steps</a>
+                </note>
+            </step>
+        </procedure>
+    </chapter>
+
+    <chapter title="How to create/update models metadata" id="how_to_update_models_metadata">
+        <tip title="Models Metadata">
+            <p>
+                We use a <a href="Cloud-Database.topic">D1 database in Cloudflare</a> where we store metadata for each model.
+                You can go <a href="Cloud-Database.topic#models_table_structure">here</a> for a model table reference.
+            </p>
+        </tip>
+
+        <procedure title="Easier way for simple database operations" id="easy_way_for_simple_database_operations">
+            <step><p>
+                Open <a href="https://dash.cloudflare.com/35ffb8490e28826a7367c73da57f6afc/workers/d1">
+                Cloudflare D1 Databases</a> page
+            </p>
+                <note title="Start with staging database">
+                    It is a good idea to make any change on <control>staging</control> database first,
+                    and when you're satisfied with the results, repeat it on <control>production</control>
+                </note>
+
+            </step>
+            <step>
+                <p>Open database console tab</p>
+                <img src="cf-d1-console.png" alt="Cloudflare D1 Console" thumbnail="true"/>
+            </step>
+            <step>
+                <p>Create a bookmark in case you'll need to roll back your changes. In the input field at the bottom
+                    of the page enter command <code>/bookmark</code> and click on <control>Execute</control> button.</p>
+                <tip title="Restore command">
+                    You will see a restore command in the console. It looks like this:
+
+                    <code-block lang="generic">
+                        /restore 00000044-00000000-00004d22-eb52c228eecb20b0fe2ec8be97741af5
+                    </code-block>
+
+                    Save it somewhere, so you can revert the database to this state if needed.
+                </tip>
+            </step>
+            <step>
+                <p>Make needed changes by executing SQL queries. Enter SQL query in the input field at the bottom
+                    of the page and click on <control>Execute</control> button. See the examples below:</p>
+                <deflist>
+                    <def title="Select all models">
+                        <code-block lang="sql">
+                            SELECT * FROM models
+                        </code-block>
+                    </def>
+                    <def title="Select specific fields for all models">
+                        <code-block lang="sql">
+                            SELECT id, name, active, age, gender, language, f0m, f0max, pitch_min, pitch_max, created_at, updated_at FROM models
+                        </code-block>
+                    </def>
+                    <def title="Find model by name">
+                        <code-block lang="sql">
+                            SELECT * FROM models WHERE name = 'Oleg'
+                        </code-block>
+                    </def>
+                    <def title="Get all inactive models">
+                        <code-block lang="sql">
+                            SELECT * FROM models WHERE active = 0
+                        </code-block>
+                    </def>
+                    <def title="Create a new model record">
+                        <code-block lang="sql">
+                            INSERT INTO models (active, name, language, gender, age, image, f0m, f0max, pitch_min, pitch_max)
+                            VALUES (0,'John','English','male','older','image_base64_string',80,800,'C2','C5')
+                        </code-block>
+                        <include from="Common-Library.topic" element-id="cf-d1-model-active-flag" />
+                    </def>
+                    <def title="Set model to active state">
+                        <code-block lang="sql">
+                            UPDATE models SET active = 1 WHERE name = 'John'
+                        </code-block>
+                    </def>
+                    <def title="Set model to inactive state">
+                        <code-block lang="sql">
+                            UPDATE models SET active = 0 WHERE name = 'John'
+                        </code-block>
+                    </def>
+                    <def title="Update model's image">
+                        <code-block lang="sql">
+                            UPDATE models SET image = 'new_image_base64_data' WHERE name = 'John'
+                        </code-block>
+                    </def>
+                    <def title="Update model's f0m value">
+                        <code-block lang="sql">
+                            UPDATE models SET f0m = 118 WHERE name = 'John'
+                        </code-block>
+                    </def>
+                    <def title="Update model's pitch range">
+                        <code-block lang="sql">
+                            UPDATE models SET pitch_min = 'E3', pitch_max = 'B5' WHERE name = 'John'
+                        </code-block>
+                    </def>
+                </deflist>
+                <tip>
+                    Make sure that you run exactly the same <control>SQL commands</control> for both
+                    <control>production</control> and <control>staging</control> databases
+                </tip>
+                <warning title="Delete models">
+                    It is not recommended to delete model records unless you must do so.
+                    Make model inactive instead
+                </warning>
+            </step>
+            <step>
+                If you need to revert your changes, use your saved <code>/rollback</code> command
+            </step>
+        </procedure>
+
+        <procedure title="Developer way">
+            <include from="Common-Library.topic" element-id="before_d1_db_work_snippet" />
+            <step>
+                <p>From your command line or IDE,
+                    go to the folder where you have cloned <code>voicerary-cloudflare</code> repository</p>
+            </step>
+            <step>
+                <p>To find existing model by its name, run</p>
+                <code-block lang="shell">
+                    wrangler d1 execute voicerary-staging \
+                    --command="SELECT id, active, name, language, gender, age, f0m, f0max FROM models WHERE name = 'John'"
+                </code-block>
+                <tip>
+                    Replace <code>voicerary-staging</code> with <code>voicerary-production</code> to query different
+                    databases and change <code>--command</code> sql query to get data that you want to check
+                </tip>
+            </step>
+            <step>
+                <p>If you want to create a new model record, use the following command</p>
+                <code-block lang="shell">
+                    wrangler d1 execute voicerary-staging \
+                    --command="INSERT INTO [models] (active, name, language, gender, age, image, f0m, f0max, pitch_min, pitch_max) VALUES (0,'John','English','male','older','image_base64_data',80,800,'C2','C5');"
+                </code-block>
+                <include from="Common-Library.topic" element-id="cf-d1-model-active-flag" />
+            </step>
+            <step>
+                <p>If you want to update existing model record (for example, make it active), use the following command</p>
+                <code-block lang="shell">
+                    wrangler d1 execute voicerary-staging \
+                    --command="UPDATE models SET active = 1 WHERE name = 'John'"
+                </code-block>
+            </step>
+            <step>
+                <p>Make sure that you run exactly the same <control>INSERT/UPDATE</control> commands for the
+                    <control>production</control> database when you are ready to do so</p>
+                <tip>
+                    If you're just doing a small model update on production, please remember to update
+                    staging too
+                </tip>
+            </step>
+        </procedure>
+    </chapter>
+
+    <chapter title="How to upload large files to R2 with AWS CLI" id="how_to_upload_large_files_to_r_2_with_aws_cli">
+        <p>Cloudflare R2 web interface has a limitation of <control>300Mb</control> per file. To upload larger files
+            (like indexes), you can use <code>AWS CLI</code></p>
+        <procedure collapsible="true" default-state="collapsed" title="How to set up AWS CLI" id="how_to_setup_aws_cli">
+            <step>Install <a href="https://aws.amazon.com/cli/">AWS CLI</a></step>
+            <step>Create a <a href="https://dash.cloudflare.com/35ffb8490e28826a7367c73da57f6afc/r2/api-tokens">
+                personal R2 API token</a> with read and write access to the <control>rvc-models</control> bucket
+                <img border-effect="line" src="r2-token.png" alt="Create token"/>
+            </step>
+            <step>
+                <p>To configure it to work with Cloudflare R2 use <code>aws configure</code> command and
+                    provide the following information:</p>
+                <list>
+                    <li>AWS Access Key ID: provide <control>Access Key ID</control> value from Cloudflare</li>
+                    <li>AWS Secret Access Key: provide code <control>Secret Access Key</control> value from Cloudflare</li>
+                    <li>Default region name: <control>auto</control></li>
+                    <li>Default output format: <control>json</control></li>
+                </list>
+            </step>
+        </procedure>
+        <procedure title="How to upload files using AWS CLI" id="how_to_upload_with_aws_cli">
+            <step>Open your favorite command line</step>
+            <step>
+                <p>
+                    Run <code>aws s3 --endpoint-url https://35ffb8490e28826a7367c73da57f6afc.r2.cloudflarestorage.com
+                    cp {local_file_path} s3://rvc-models/models/{remote_file}</code>
+                </p>
+                <tip title="File upload Example">
+                    <code>aws s3 --endpoint-url https://35ffb8490e28826a7367c73da57f6afc.r2.cloudflarestorage.com
+                        cp ./Test.index s3://rvc-models/models/Test.index</code>
+                </tip>
+                <tip title="Folder upload Example">
+                    <code>aws s3 --endpoint-url https://35ffb8490e28826a7367c73da57f6afc.r2.cloudflarestorage.com
+                        cp --recursive ./folder_with_files s3://rvc-models/models</code>
+                </tip>
+            </step>
+        </procedure>
+    </chapter>
+</topic>

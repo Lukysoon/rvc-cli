@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Changelog" id="Changelog">
+
+    <chapter title="Changelog" id="changelog-overview-chapter" >
+        <p>Here you'll find all the information about changes in Voicerary API and this documentation</p>
+        <table style="both">
+            <tr>
+                <td sorted="desc">Version</td>
+                <td>Date</td>
+                <td>Changes</td>
+            </tr>
+            <tr>
+                <td>main.v01</td>
+                <td>2024-01-17</td>
+                <td>init</td>
+            </tr>
+            <tr>
+                <td>main.v02</td>
+                <td>2024-01-18</td>
+                <td>
+                    <list>
+                        <li>Added important note about
+                            <a href="How-to-update-models.topic#how_to_update_models_metadata">models metadata
+                                create/update</a> process</li>
+                        <li>Added <code>active</code> flag to the
+                            <a href="Cloud-Database.topic#models_table_structure">model table definition</a></li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v03</td>
+                <td>2024-01-18</td>
+                <td>
+                    <list>
+                        <li>
+                            Replaced instructions about
+                            <a href="How-to-update-models.topic#how_to_update_models_metadata">models metadata updates</a>.
+                            Now you should use Wrangler CLI tool from your local machine to query D1 Database
+                        </li>
+                        <li>
+                            Added steps to make database structure changes with
+                            <a href="Cloud-Database.topic#d1_db_changes">migrations</a>
+                        </li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v04</td>
+                <td>2024-01-24</td>
+                <td>
+                    <list>
+                        <li>Added guide for <a href="How-to-update-models.topic#easy_way_for_simple_database_operations">
+                            easier way of making changes</a> to the D1 databases</li>
+                        <li>Changed <a href="Voicerary-API-Documentation.topic#voice-conversion-api">requirements</a>
+                            for input audio file: max duration now is 30 minutes instead of 2 hours</li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v05</td>
+                <td>2024-01-30</td>
+                <td>
+                    <control>Attention: breaking changes</control>
+                    <list>
+                        <li>Added required
+                            <a href="Voicerary-API-Documentation.topic#voice-conversion-api">request parameter</a>:
+                            <code>mode</code>
+                        </li>
+                        <li>Request parameters <code>filepath</code> and <code>model_name</code> must be arrays from now</li>
+                        <li>
+                            Changed response format to support different processing modes. Now you can send payload,
+                            that will trigger multiple conversions at once, and response will contain details for each
+                            conversion. Refer to <a href="Voicerary-API-Documentation.topic#voice-conversion-api">
+                            this page</a> for details
+                        </li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v06</td>
+                <td>2024-02-05</td>
+                <td>
+                    <list>
+                        <li>Added some reasonable limits for different
+                            <a href="Voicerary-API-Documentation.topic#voice-conversion-api">processing modes</a></li>
+                        <li>Added steps for
+                            <a href="How-to-release-rollback-on-production.topic">production rollback process</a></li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v07</td>
+                <td>2024-02-09</td>
+                <td>
+                    <list>
+                        <li><code>voicerary</code> <a href="How-to-update-a-Docker-image.topic">Docker image</a>
+                            now does not contain models and indexes inside; it will download it on-demand at runtime</li>
+                        <li>Simplified <a href="How-to-update-models.topic">models updates</a> process:
+                        now there is no need to build a new Docker image each time you add a new model</li>
+                        <li>Added page that explains <a href="How-to-update-this-documentation.topic">
+                            how to update this documentation</a></li>
+                        <li>Added changes to <a href="RunPod-Serverless-API-Endpoint.topic"/> page: we're now using
+                        RunPod Secrets to store sensitive credentials and provide it to the container at runtime</li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v08</td>
+                <td>2024-02-17</td>
+                <td>
+                    <list>
+                        <li>Removed <code>ERR_VIDEO_NOT_SUPPORTED</code>from the error list</li>
+                        <li>Improved error messages shown to the user with suggested action if possible</li>
+                        <li>Added new guide <a href="Local-Development.topic" /></li>
+                        <li>Added new guide <a href="How-to-gain-access-to-this-documentation.topic" /></li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v09</td>
+                <td>2024-02-19</td>
+                <td>
+                    <list>
+                        <li>Added pitch min and max columns along with timestamps for <a href="Cloud-Database.topic">models table</a></li>
+                        <li>Added new page: <a href="Architecture-Overview.topic" /></li>
+                    </list>
+                </td>
+            </tr>
+            <tr>
+                <td>main.v10</td>
+                <td>2024-03-01</td>
+                <td>
+                    Added new <a href="Cloud-Database.topic#api_routes_to_manage_models_metadata_crud_operations_">API endpoints</a>
+                    to manage models metadata in Cloudflare D1 database
+                </td>
+            </tr>
+        </table>
+    </chapter>
+</topic>

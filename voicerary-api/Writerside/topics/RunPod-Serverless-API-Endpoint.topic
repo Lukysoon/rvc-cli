@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="RunPod Serverless API Endpoint" id="RunPod-Serverless-API-Endpoint">
+    <show-structure for="chapter,procedure" depth="2"/>
+    <p>
+        RunPod offers Serverless GPU computing for AI Inference and Training, allowing users to pay by the second
+        for their compute usage. Basically, it means that RunPod can provide an API endpoint for our needs.
+        Proper request to that endpoint will spin up a new docker container our custom image,
+        and it will download an audio file from <a href="Cloud-Storage.topic">cloud storage</a>,
+        convert it using the <a href="Cloud-Database.topic#models_table_structure">selected model</a> and upload
+        the converted file to the Cloud Storage. Then the container will be stopped.
+        RunPod has good documentation regarding its Serverless GPU service
+        <a href="https://docs.runpod.io/docs/overview">here</a>.
+    </p>
+    <p>
+        This page describes all you need to know to create and maintain RunPod Serverless API Endpoint for voice
+        conversion.
+    </p>
+
+    <chapter title="How to create a new Endpoint" id="runpod-endpoint-creation">
+        <procedure title="Prerequisites" collapsible="true">
+            <step>
+                <p>Open your RunPod account and go to
+                    <ui-path>Settings | API Keys</ui-path>
+                    and add a new API key
+                </p>
+            </step>
+            <step>
+                <p>
+                    <emphasis>Optional.</emphasis>
+                    If your Docker image is private,
+                    go to
+                    <ui-path>Settings | Container Registry Auth</ui-path>
+                    and provide DockerHub credentials so RunPod will be able to pull that image
+                </p>
+            </step>
+        </procedure>
+        <procedure title="Custom Template creation" collapsible="true" id="runpod-custom-template">
+            <step>
+                Go to <ui-path>Secrets</ui-path> and create secrets for all secret variables:
+                <include from="Common-Library.topic" element-id="env_secret_vars"/>
+            </step>
+            <step>Go to
+                <ui-path>Serverless | Custom Templates</ui-path>
+                and click on a
+                <control>New Template</control>
+                button
+            </step>
+            <step>Name your template</step>
+            <step>
+                <p>
+                    Set container image to your image (use proper tag)
+                </p>
+                <tip title="Example">
+                    <code-block>
+                        ryurchik/voicerary:version-0.6.7
+                    </code-block>
+                </tip>
+            </step>
+            <step>
+                <emphasis>Optional.</emphasis>
+                If your image is private, select proper
+                DockerHub credentials
+            </step>
+            <step>
+                Set
+                <control>Container Disk</control>
+                size to
+                <control>30GB</control>
+            </step>
+            <step>
+                <p>For the
+                    <control>Environment Variables</control>
+                    section, define the same variables names as you did for <control>Step 1</control>, then
+                    click on a key icon and select the respective secret value for a variable.</p>
+                <tip title="Example">
+                    <deflist>
+                        <def title="AWS_ACCESS_KEY_ID:">
+                            <code>{{ RUNPOD_SECRET_AWS_ACCESS_KEY_ID_PRODUCTION }}</code>
+                        </def>
+                    </deflist>
+                </tip>
+            </step>
+            <step>Save your template</step>
+            <img thumbnail="true" border-effect="line" src="runpod-template.png" alt="RunPod Endpoint Template"/>
+        </procedure>
+        <procedure title="Endpoint Creation" id="endpoint_creation" collapsible="true">
+            <step>
+                Go to
+                <ui-path>Serverless | Endpoints</ui-path>
+                and click on
+                <control>New Endpoint</control>
+            </step>
+            <step>
+                Give it some reasonable name
+            </step>
+            <step>
+                Select the template that you created
+            </step>
+            <step><p>
+                Add some GPUs to your endpoint
+            </p>
+                <warning title="Incompatible GPU">
+                    Do not select
+                    <control>L4</control>
+                    GPU, rvc code doesn't work with it
+                </warning>
+            </step>
+            <step>
+                <p>
+                    Deploy your endpoint
+                </p>
+            </step>
+            <img thumbnail="true" border-effect="line" src="runpod-endpoint-creation.png"
+                 alt="RunPod Endpoint Creation"/>
+            <tip title="Endpoint ID">
+                Note down your Endpoint ID, it is required to run API requests. You can find it under
+                endpoint's name
+                <img border-effect="line" src="endpoint-id.png" alt="RunPod Endpoint ID"/>
+            </tip>
+        </procedure>
+    </chapter>
+</topic>

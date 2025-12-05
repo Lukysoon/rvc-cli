@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="How to release updates to the Voicerary API code" id="How-to-update-a-Docker-image">
+
+    <note title="DockerHub Autobilds">
+        <p>DockerHub builds new image automatically based on tag information in
+            <a href="https://github.com/ryurchik/voicerary-api">voicerary-rvc</a> repository</p>
+    </note>
+
+    <chapter title="Before you start" id="before">
+        <p>Make sure that:</p>
+        <list>
+            <li>you can push to the <a href="https://github.com/ryurchik/voicerary-api">voicerary-api</a> repository</li>
+        </list>
+    </chapter>
+
+    <chapter title="How to trigger a new DockerHub build" id="how-to-trigger-dockerhub-build">
+        <procedure title="Follow image tag conventions" id="follow_image_tag_conventions">
+            <step>For <control>rvc-runtime</control> image create <control>runtime-v0.0.0</control> tags</step>
+            <step>For <control>voicerary</control> image create <control>v0.0.0</control> tags</step>
+        </procedure>
+        <tip>
+            Typically, if you want to update the app code, or you uploaded some new models to the cloud storage,
+            you should create a new tag to trigger <control>voicerary</control> image build. Runtime will remain untouched.
+        </tip>
+        <warning title="Runtime image update">
+            If you have updated <control>rvc-runtime</control> image,
+            and now you want to update <control>voicerary</control> image to use the latest runtime,
+            please, first commit and push a change to <code>FROM</code> section in
+            <a href="https://github.com/ryurchik/voicerary-api/blob/main/Dockerfile.production">
+            Dockerfile.production</a>
+        </warning>
+        <include from="Common-Library.topic" element-id="github-release" />
+    </chapter>
+</topic>

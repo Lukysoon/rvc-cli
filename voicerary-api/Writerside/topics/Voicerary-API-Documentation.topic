@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="API Documentation" id="Voicerary-API-Documentation">
+    <show-structure for="chapter,procedure" depth="2"/>
+    <chapter title="Overview" collapsible="true" default-state="expanded" id="basic-api-information">
+        <p>We use <a href="RunPod-Serverless-API-Endpoint.topic">RunPod Serverless API Endpoint</a> to run our voice conversion code.</p>
+        <p>Base API URL: <code>https://api.runpod.ai/v2/</code></p>
+    </chapter>
+    <chapter title="Credentials and Authorization" id="credentials" collapsible="true" default-state="expanded">
+        <p>To create a valid API request you need to have 2 things:</p>
+        <list type="decimal">
+            <li>Endpoint ID (<code>endpoint_id</code>)</li>
+            <li>API Token (<code>token</code>)</li>
+        </list>
+        <procedure title="Authorization">
+            <step>Append <code>endpoint_id</code> to the base API URL</step>
+            <step>Append API method name using <a href="https://docs.runpod.io/docs/serverless-endpoint-urls">one of
+                listed here</a></step>
+            <step>Provide <code>Authorization</code> header with <code>Bearer {token}</code> value</step>
+            <step>Add <code>Content-Type: application/json</code> header</step>
+            <step>Provide required payload id needed</step>
+            <step>Use right HTTP verb and make a request</step>
+            <tip title="Request Example">
+                <code-block>
+                    curl -X POST https://api.runpod.ai/v2/{endpoint_id}/run \
+                    -H 'Content-Type: application/json' \
+                    -H 'Authorization: Bearer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'\
+                    -d '{"input": {your-json-payload}}'
+                </code-block>
+            </tip>
+            <tip title="Response Example">
+                <code-block lang="json">
+                    {
+                        "id": "5cd41f9c-a6a8-40d2-9352-b9fd8fb0d5bc-e1",
+                        "status": "IN_QUEUE"
+                    }
+                </code-block>
+            </tip>
+            <p>See also <a href="https://docs.runpod.io/docs/serverless-endpoint-urls">official RunPod docs</a> to get
+                more about responses and <a href="https://docs.runpod.io/docs/serverless-job-states">statuses</a>.</p>
+        </procedure>
+    </chapter>
+    <chapter title="Voice Conversion" id="voice-conversion-api">
+        <note title="Asynchronous requests and statuses">
+            <p>
+                To do voice conversion use <code>POST /run</code> API method.
+                This is an asynchronous approach, RunPod will respond with a <code>job_id</code> and put your payload into
+                its own queue.
+                You're responsible to poll the result using <code>GET /status/{job_id}</code> API method.
+                Another way to do it is to set up a webhook on your side and provide it in a request. RunPod will call it
+                as soon
+                as your request is processed. Read more about <a
+                    href="https://docs.runpod.io/docs/serverless-endpoint-urls#statusjob_id">status polling</a> and <a
+                    href="https://docs.runpod.io/docs/serverless-usage#--webhook">webhooks</a>.
+            </p>
+        </note>
+        <include from="Common-Library.topic" element-id="audio_file_requirements" />
+        <include from="Common-Library.topic" element-id="video_files_note" />
+        <tip title="Request Payload Examples">
+            <p>Processing mode: <control>single</control></p>
+            <code-block lang="json">
+                {
+                    "webhook": "https://url.to.your.webhook",
+                    "input": {
+                        "mode": "single",
+                        "bypass_auto_pitch": false,
+                        "f0method": "rmvpe",
+                        "f0up_key": -3,
+                        "filepath": [
+                            "vc/audio/K-1h.wav"
+                        ],
+                        "filter_radius": 3,
+                        "index_rate": 0,
+                        "model_name": [
+                            "Model.Name"
+                        ],
+                        "protect": 0.1,
+                        "resample_sr": 0,
+                        "rms_mix_rate": 1
+                    }
+                }
+            </code-block>
+            <p>Processing mode: <control>preview</control></p>
+            <code-block lang="json">
+                {
+                    "webhook": "https://url.to.your.webhook",
+                    "input": {
+                        "mode": "preview",
+                        "bypass_auto_pitch": false,
+                        "f0method": "rmvpe",
+                        "f0up_key": -3,
+                        "filepath": [
+                            "vc/audio/K-1h.wav"
+                        ],
+                        "filter_radius": 3,
+                        "index_rate": 0,
+                        "model_name": [
+                            "Model1",
+                            "Model2",
+                            "Model3"
+                        ],
+                        "protect": 0.1,
+                        "resample_sr": 0,
+                        "rms_mix_rate": 1
+                    }
+                }
+            </code-block>
+            <p>Processing mode: <control>multi</control></p>
+            <code-block lang="json">
+                {
+                    "webhook": "https://url.to.your.webhook",
+                    "input": {
+                        "mode": "multi",
+                        "bypass_auto_pitch": false,
+                        "f0method": "rmvpe",
+                        "f0up_key": -3,
+                        "filepath": [
+                            "vc/audio/File1.wav",
+                            "vc/audio/File2.wav",
+                            "vc/audio/File3.wav"
+                        ],
+                        "filter_radius": 3,
+                        "index_rate": 0,
+                        "model_name": [
+                            "Model1",
+                            "Model2",
+                            "Model3"
+                        ],
+                        "protect": 0.1,
+                        "resample_sr": 0,
+                        "rms_mix_rate": 1
+                    }
+                }
+            </code-block>
+        </tip>
+        <include from="Common-Library.topic" element-id="api_request_parameters_information" />
+        <include from="Common-Library.topic" element-id="common_request_params" />
+        <tip title="Successful Response Payload Example">
+            <code-block lang="json">
+                {
+                    "delayTime": 7019,
+                    "executionTime": 173988,
+                    "id": "0416a9ad-7e40-4fe2-b079-c545d732b211-e1",
+                    "output": {
+                        "processing_result": [
+                            {
+                                "model": "Danylo",
+                                "input_file": "vc/audio/test/test_audio.wav",
+                                "input_f0m": 139.0,
+                                "auto_pitch_correction_semitones": -5,
+                                "output_file": "vc/audio/test/test_audio_Danylo_1706472901.wav",
+                                "status": "success",
+                                "error_message": null,
+                            },
+                            {
+                                "model": "Oleg",
+                                "input_file": "vc/audio/test/test_audio.wav",
+                                "input_f0m": 139.0,
+                                "auto_pitch_correction_semitones": -6,
+                                "output_file": "vc/audio/test/test_audio_Oleg_1706472560.wav",
+                                "status": "error",
+                                "error_message": "General error. For support, please, provide this ID: 7bf1ddcc-0709-4dfd-bffd-1eecd270e335-u1.",
+                            }
+                        ],
+                        "auto_pitch_correction_bypassed": false,
+                        "orig_request_payload": {
+                            "delayTime": 505,
+                            "id": "383fc185-1c71-4fdb-84fc-226c8bc489ad-u1",
+                            "input": {
+                                "mode": "preview",
+                                "bypass_auto_pitch": false,
+                                "f0method": "rmvpe",
+                                "f0up_key": 0,
+                                "filepath": [
+                                    "vc/audio/test/test_audio.wav"
+                                ],
+                                "filter_radius": 3,
+                                "index_rate": 0,
+                                "model_name": [
+                                    "Danylo",
+                                    "Oleg"
+                                ],
+                                "protect": 0.3,
+                                "resample_sr": 0,
+                                "rms_mix_rate": 0.8
+                            },
+                            "status": "IN_QUEUE",
+                            "webhook": "https://voicerary.azurewebsites.net/runpod"
+                        },
+                    },
+                    "status": "COMPLETED"
+                }
+            </code-block>
+        </tip>
+        <warning title="Partial success">
+            Keep in mind: when your payload will trigger more than one conversion (for example, when you use
+            <control>preview</control> mode),
+            it can happen that some conversions were successful and other failed.
+            Voicerary API will consider overall processing status as successful if at least one conversion was
+            completed successfully. It is up to you to check individual statuses for each converted file in
+            API response.
+        </warning>
+        <chapter title="Successful Response Parameters Information" id="response_parameters" collapsible="true" default-state="expanded">
+            <table style="both">
+                <tr>
+                    <td>Parameter</td>
+                    <td>Required/Optional</td>
+                    <td>Data Type</td>
+                    <td>Description</td>
+                </tr>
+                <tr>
+                    <td>delayTime</td>
+                    <td>required</td>
+                    <td>int</td>
+                    <td>RunPod will inject this value; milliseconds passed before actual processing started</td>
+                </tr>
+                <tr>
+                    <td>executionTime</td>
+                    <td>required</td>
+                    <td>int</td>
+                    <td>RunPod will inject this value; milliseconds spent for processing</td>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>RunPod will inject this value; identifier for a job on the RunPod side</td>
+                </tr>
+                <tr>
+                    <td>output</td>
+                    <td>required</td>
+                    <td>object</td>
+                    <td>RunPod will return result in this object</td>
+                </tr>
+                <tr>
+                    <td>output.event_time</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>ISO-formatted date and time of the event</td>
+                </tr>
+                <tr>
+                    <td>output.processing_result</td>
+                    <td>required</td>
+                    <td>array</td>
+                    <td>Array of objects, one per each conversion</td>
+                </tr>
+                <tr>
+                    <td>output.processing_result[] .model</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>Model name that was used for this conversion</td>
+                </tr>
+                <tr>
+                    <td>output.processing_result[] .input_file</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>S3-compatible bucket path to the input file that was used for this conversion</td>
+                </tr>
+                <tr>
+                    <td>output.processing_result[] .input_audio_f0m</td>
+                    <td>required</td>
+                    <td>float|null</td>
+                    <td>Detected fundamental frequency for an input audio.
+                        Will be 0 if <code>input.bypass_auto_pitch</code> was set to <code>true</code>.
+                        Will be <code>null</code> if
+                        <code>output.processing_result[].status</code> is <control>error</control>
+                    </td>
+                </tr>
+                <tr>
+                    <td>output.processing_result[] .auto_pitch_correction_semitones</td>
+                    <td>required</td>
+                    <td>signed int|null</td>
+                    <td>Auto pitch correction in semitones that was applied to the inference.
+                        If <code>input.bypass_auto_pitch</code> was set to <code>true</code> then it always be 0.
+                        Will be <code>null</code> if
+                        <code>output.processing_result[].status</code> is <control>error</control></td>
+                </tr>
+                <tr>
+                    <td>output.processing_result[] .output_file</td>
+                    <td>required</td>
+                    <td>string|null</td>
+                    <td>
+                        <p>S3-compatible bucket path to the converted audio (wav file format) if
+                            <code>output.processing_result[].status</code> is <control>success</control>.
+                        Filename will be unique for each file and will contain:
+                        </p>
+                        <list>
+                            <li><code>S</code> flag (singing) if <code>input.bypass_auto_pitch</code>
+                                is <code>true</code></li>
+                            <li>model name</li>
+                            <li>pitch from <code>input.f0up_key</code></li>
+                            <li>a timestamp</li>
+                        </list>
+                        <p>
+                            Will be <code>null</code> if
+                            <code>output.processing_result[].status</code> is <control>error</control>
+                        </p>
+                        <include from="Common-Library.topic" element-id="converted-file-naming"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>output.processing_result[].status</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td><control>success</control> or <control>error</control></td>
+                </tr>
+                <tr>
+                    <td>output.processing_result[] .error_message</td>
+                    <td>required</td>
+                    <td>string|null</td>
+                    <td>If <code>output.processing_result[].status</code> is <control>error</control>,
+                        this field will contain a user-friendly error message that you can show on the frontend
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>output. auto_pitch_correction_bypassed</td>
+                    <td>required</td>
+                    <td>boolean</td>
+                    <td>Taken from the request payload, <code>input.bypass_auto_pitch</code> parameter</td>
+                </tr>
+                <tr>
+                    <td>output.orig_request_payload</td>
+                    <td>required</td>
+                    <td>object</td>
+                    <td>
+                        Original request payload object
+                    </td>
+                </tr>
+                <tr>
+                    <td>status</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>
+                        Should be <code>COMPLETED</code> for successful response
+                    </td>
+                </tr>
+            </table>
+        </chapter>
+        <warning title="Error Response Payload Example">
+            <code-block lang="json">
+                {
+                    "delayTime": 7939,
+                    "error": "We cannot find a voice you selected for processing. For support, please, provide this ID: 7bf1ddcc-0709-4dfd-bffd-1eecd270e335-u1.",
+                    "executionTime": 6806,
+                    "id": "f506758d-8429-4c0a-8ffb-04ab96c4ceed-e1",
+                    "status": "FAILED"
+                }
+            </code-block>
+        </warning>
+        <tip title="Failed request">Voicerary API will consider request as failed when
+            <control>all requested conversions</control> were failed. For example, if your payload
+            has mode <control>preview</control> and two models listed in <control>input.model_name</control>
+            you'll get a failed response only if both conversions have failed.
+        </tip>
+        <chapter title="Error Response Parameters Information" id="err_response_parameters" collapsible="true" default-state="expanded">
+            <table style="both">
+                <tr>
+                    <td>Parameter</td>
+                    <td>Required/Optional</td>
+                    <td>Data Type</td>
+                    <td>Description</td>
+                </tr>
+                <tr>
+                    <td>delayTime</td>
+                    <td>required</td>
+                    <td>int</td>
+                    <td>RunPod will inject this value; milliseconds passed before actual processing started</td>
+                </tr>
+                <tr>
+                    <td>executionTime</td>
+                    <td>required</td>
+                    <td>int</td>
+                    <td>RunPod will inject this value; milliseconds spent for processing</td>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>RunPod will inject this value; identifier for a job on the RunPod side</td>
+                </tr>
+                <tr>
+                    <td>error</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>User-friendly error message with request ID injected for better support</td>
+                </tr>
+                <tr>
+                    <td>status</td>
+                    <td>required</td>
+                    <td>string</td>
+                    <td>
+                        Should be <code>FAILED</code> for error response
+                    </td>
+                </tr>
+            </table>
+        </chapter>
+        <include from="Common-Library.topic" element-id="predefined_error_messages" />
+    </chapter>
+
+</topic>

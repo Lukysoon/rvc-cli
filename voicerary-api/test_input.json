@@ -1,0 +1,19 @@
+{
+  "input": {
+    "mode": "preview",
+    "bypass_auto_pitch": false,
+    "f0method": "rmvpe",
+    "f0up_key": 0,
+    "filepath": [
+      "test/err_test_cases/silent.wav"
+    ],
+    "filter_radius": 3,
+    "index_rate": 0,
+    "model_name": [
+      "Jakub"
+    ],
+    "protect": 0.1,
+    "resample_sr": 0,
+    "rms_mix_rate": 1
+  }
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Cloud Storage" id="Cloud-Storage">
+
+    <chapter title="Cloudflare R2 Buckets" id="cloudflare_r_2_buckets">
+        <p>
+            We use Cloudflare R2 buckets for two purposes: as a permanent storage for trained models/indexes
+            and as a temporary storage for uploads and converted files.
+        </p>
+        <p>We have two buckets with the following conventions:</p>
+        <procedure title="rvc-models" id="rvc_models" type="choices">
+            <step>
+                <a href="https://dash.cloudflare.com/35ffb8490e28826a7367c73da57f6afc/r2/default/buckets/rvc-models">
+                    bucket link</a></step>
+            <step>permanent storage for trained models and indexes</step>
+            <step><p>models should be uploaded into the <code>/models</code> folder and have <code>.pth</code>
+                extension.
+                Model should be named as <code>{VoiceName}.pth</code>.
+            </p>
+                <tip title="Example"><code>Danylo.pth</code></tip>
+            </step>
+            <step><p>
+                indexes should be uploaded into the same <code>/models</code> folder and have
+                <code>{VoiceName}.index</code>
+                filename.
+            </p>
+                <tip title="Example"><code>Danylo.index</code></tip>
+            </step>
+            <step>bucket contents are private and there is no public access to it</step>
+        </procedure>
+        <procedure title="voicerary" id="voicerary_bucket" type="choices">
+            <step>
+                <a href="https://dash.cloudflare.com/35ffb8490e28826a7367c73da57f6afc/r2/default/buckets/voicerary">
+                    bucket link</a></step>
+            <step>temporary storage for user-uploaded files and for converted files</step>
+            <step>user files should be uploaded to the <code>/vc/audio</code> folder, each file must have unique name
+            </step>
+            <step><p>converted file will be stored at the same location as its source.
+                Filename will be unique for each file and will contain a singing flag (optional),
+                model name, requested pitch and a timestamp value
+            </p>
+                <include from="Common-Library.topic" element-id="converted-file-naming"/>
+            </step>
+            <step>bucket contents are private and there is no public access to it</step>
+            <step>files retention policy for this bucket is 1 week</step>
+        </procedure>
+    </chapter>
+</topic>

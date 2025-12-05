@@ -1,0 +1,13 @@
+<buildprofiles xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd">
+    <variables>
+        <primary-color>dracula</primary-color>
+        <custom-favicons>favicon.svg</custom-favicons>
+        <header-logo>favicon.svg</header-logo>
+        <product-web-url>https://voicerary.com</product-web-url>
+        <web-root>https://ryurchik.github.io/voicerary-api</web-root>
+        <algolia-api-key>af8036aa487fa533b7377b086e4c8f76</algolia-api-key>
+        <algolia-id>34IR9LZ1WX</algolia-id>
+        <algolia-index>prod_voicerary-api</algolia-index>
+    </variables>
+</buildprofiles>

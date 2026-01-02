@@ -1,13 +1,12 @@
 import time
-import logging
 from tensorboard import program
+
+import custom_logging  # Centralized logging initialization
 
 log_path = "logs"
 
 
 def launch_tensorboard_pipeline():
-    logging.getLogger("root").setLevel(logging.WARNING)
-    logging.getLogger("tensorboard").setLevel(logging.WARNING)
 
     tb = program.TensorBoard()
     tb.configure(argv=[None, "--logdir", log_path, "--host", "0.0.0.0"])

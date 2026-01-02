@@ -32,3 +32,6 @@ node_modules
 
 # For Apple
 .DS_store
+
+*.wav
+*.mp3

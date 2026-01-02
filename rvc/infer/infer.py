@@ -31,11 +31,6 @@ from rvc.lib.tools.split_audio import process_audio, merge_audio
 from rvc.lib.algorithm.synthesizers import Synthesizer
 from rvc.configs.config import Config
 
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("httpcore").setLevel(logging.WARNING)
-logging.getLogger("faiss").setLevel(logging.WARNING)
-logging.getLogger("faiss.loader").setLevel(logging.WARNING)
-
 from custom_logging import get_logger
 
 class VoiceConverter:
@@ -253,12 +248,7 @@ class VoiceConverter:
         """
         self.get_vc(model_path, sid)
 
-        log_filename = "/workspace/rvc-cli/inference.log"
-
-        if not os.path.exists(log_filename):
-            os.mknod(log_filename)
-
-        logger = get_logger(log_filename)
+        logger = get_logger("inference.log")
         try:
             start_time = time.time()
             logger.info(f"Converting audio '{audio_input_path}'...")
@@ -377,12 +367,7 @@ class VoiceConverter:
             **kwargs: Additional keyword arguments.
         """
 
-        log_filename = "/workspace/rvc-cli/inference.log"
-
-        if not os.path.exists(log_filename):
-            os.mknod(log_filename)
-
-        logger = get_logger(log_filename)
+        logger = get_logger("inference.log")
 
         pid = os.getpid()
         try:

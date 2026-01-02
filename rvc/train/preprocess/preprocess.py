@@ -18,13 +18,7 @@ sys.path.append(now_directory)
 from rvc.lib.utils import load_audio
 from rvc.train.preprocess.slicer import Slicer
 
-# Remove colab logs
 from custom_logging import get_logger
-import logging
-
-logging.getLogger("numba.core.byteflow").setLevel(logging.WARNING)
-logging.getLogger("numba.core.ssa").setLevel(logging.WARNING)
-logging.getLogger("numba.core.interpreter").setLevel(logging.WARNING)
 
 experiment_dir = str(sys.argv[1])
 logger = get_logger(os.path.join(experiment_dir, "training.log"))

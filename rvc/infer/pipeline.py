@@ -17,9 +17,7 @@ sys.path.append(now_dir)
 from rvc.lib.predictors.RMVPE import RMVPE0Predictor
 from rvc.lib.predictors.FCPE import FCPEF0Predictor
 
-import logging
-
-logging.getLogger("faiss").setLevel(logging.WARNING)
+import custom_logging  # Centralized logging initialization
 
 # Constants for high-pass filter
 FILTER_ORDER = 5

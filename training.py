@@ -5,8 +5,6 @@ import logging
 from custom_logging import get_logger
 from pathlib import Path
 
-logging.getLogger("torch").setLevel(logging.ERROR)
-
 
 def run_command(command, logger):
 
@@ -175,15 +173,7 @@ def run_pipeline(
     skip_extraction=False,
     skip_training=False):
 
-    # create experiment directory
-    Path(f"/workspace/rvc-cli/logs/{model_name}").mkdir(parents=True, exist_ok=True)
-
-    log_filename = f"/workspace/rvc-cli/logs/{model_name}/training.log"
-
-    if not os.path.exists(log_filename):
-        os.mknod(log_filename)
-
-    logger = get_logger(log_filename)
+    logger = get_logger(f"{model_name}/training.log")
 
     logger.info("Starting RVC pipeline...")
     

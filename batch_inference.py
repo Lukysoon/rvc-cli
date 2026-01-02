@@ -3,10 +3,7 @@ import os
 import logging
 from pathlib import Path
 
-import logging
 from custom_logging import get_logger
-
-logging.getLogger("torch").setLevel(logging.ERROR)
 
 def run_command(command, logger):
     try:
@@ -227,12 +224,7 @@ def run_pipeline(
     delay_mix=0.5
     ):
 
-    log_filename = "/workspace/rvc-cli/batch_inference.log"
-
-    if not os.path.exists(log_filename):
-        os.mknod(log_filename)
-
-    logger = get_logger(log_filename)
+    logger = get_logger("batch_inference.log")
 
     logger.info("Starting RVC batch inference...")
 

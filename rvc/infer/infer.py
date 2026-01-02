@@ -3,7 +3,6 @@ import sys
 import time
 import torch
 import librosa
-import logging
 import traceback
 import numpy as np
 import soundfile as sf
@@ -334,6 +333,7 @@ class VoiceConverter:
                     **kwargs,
                 )
 
+            print("Audio output: ", audio_output_path)
             sf.write(audio_output_path, audio_opt, self.tgt_sr, format="WAV")
             output_path_format = audio_output_path.replace(
                 ".wav", f".{export_format.lower()}"

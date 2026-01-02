@@ -5,14 +5,13 @@ from custom_logging import get_logger
 
 def run_command(command, logger):
     try:
+        logger.info(f"Running command: {command}")
         process = subprocess.run(
             command,
             shell=True,
             check=True,
-            capture_output=True,
             text=True
         )
-
         return True
     except subprocess.CalledProcessError as e:
         logger.info(f"Error executing command: {e}")

@@ -105,6 +105,9 @@ class FeatureInput:
         if os.path.exists(opt_path1) and os.path.exists(opt_path2):
             return
 
+        np_arr = None
+        feature_pit = None
+        coarse_pit = None
         try:
             np_arr = load_audio(inp_path, 16000)
             feature_pit = self.compute_f0(np_arr, f0_method, hop_length)
@@ -115,9 +118,12 @@ class FeatureInput:
             logger.info(
                 f"An error occurred extracting file {inp_path} on {self.device}: {error}"
             )
+        finally:
+            # Explicit cleanup to prevent memory accumulation
+            del np_arr, feature_pit, coarse_pit
 
     def process_files(
-        self, files, f0_method, hop_length, device_num, device, n_threads, batch_size=100
+        self, files, f0_method, hop_length, device_num, device, n_threads, batch_size=50
     ):
         """Process multiple files in batches to control memory usage."""
         self.device = device
@@ -135,25 +141,22 @@ class FeatureInput:
         def process_file_wrapper(file_info):
             self.process_file(file_info, f0_method, hop_length)
 
-        def chunked(lst, size):
-            for i in range(0, len(lst), size):
-                yield lst[i : i + size]
-
-        with tqdm.tqdm(total=len(files), leave=True, position=device_num) as pbar:
-            for batch in chunked(files, batch_size):
-                with concurrent.futures.ThreadPoolExecutor(
-                    max_workers=n_threads
-                ) as executor:
+        # Create executor once outside the loop to prevent memory leaks
+        with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
+            with tqdm.tqdm(total=len(files), leave=True, position=device_num) as pbar:
+                # Process in chunks for memory management
+                for i in range(0, len(files), batch_size):
+                    batch = files[i:i + batch_size]
                     futures = [
                         executor.submit(process_file_wrapper, file_info)
                         for file_info in batch
                     ]
                     for future in concurrent.futures.as_completed(futures):
                         pbar.update(1)
-                # Clear memory between batches
-                gc.collect()
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
+                    # Clear memory between batches
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
 
 
 def run_pitch_extraction(files, devices, f0_method, hop_length, num_processes):
@@ -188,7 +191,7 @@ def run_pitch_extraction(files, devices, f0_method, hop_length, num_processes):
 
 
 def process_file_embedding(
-    files, version, embedder_model, embedder_model_custom, device_num, device, n_threads, batch_size=100
+    files, version, embedder_model, embedder_model_custom, device_num, device, n_threads, batch_size=50
 ):
     dtype = torch.float16 if config.is_half and "cuda" in device else torch.float32
     model = load_embedding(embedder_model, embedder_model_custom).to(dtype).to(device)
@@ -198,36 +201,39 @@ def process_file_embedding(
         wav_file_path, _, _, out_file_path = file_info
         if os.path.exists(out_file_path):
             return
-        feats = torch.from_numpy(load_audio(wav_file_path, 16000)).to(dtype).to(device)
-        feats = feats.view(1, -1)
-        with torch.no_grad():
-            feats = model(feats)["last_hidden_state"]
-            feats = (
-                model.final_proj(feats[0]).unsqueeze(0) if version == "v1" else feats
-            )
-        feats = feats.squeeze(0).float().cpu().numpy()
-        if not np.isnan(feats).any():
-            np.save(out_file_path, feats, allow_pickle=False)
-        else:
-            logger.info(f"{file_info[0]} contains NaN values and will be skipped.")
+        feats = None
+        try:
+            feats = torch.from_numpy(load_audio(wav_file_path, 16000)).to(dtype).to(device)
+            feats = feats.view(1, -1)
+            with torch.no_grad():
+                feats = model(feats)["last_hidden_state"]
+                feats = (
+                    model.final_proj(feats[0]).unsqueeze(0) if version == "v1" else feats
+                )
+            feats = feats.squeeze(0).float().cpu().numpy()
+            if not np.isnan(feats).any():
+                np.save(out_file_path, feats, allow_pickle=False)
+            else:
+                logger.info(f"{file_info[0]} contains NaN values and will be skipped.")
+        finally:
+            del feats
 
-    def chunked(lst, size):
-        for i in range(0, len(lst), size):
-            yield lst[i : i + size]
-
-    with tqdm.tqdm(total=len(files), leave=True, position=device_num) as pbar:
-        for batch in chunked(files, batch_size):
-            with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
+    # Create executor once outside the loop to prevent memory leaks
+    with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
+        with tqdm.tqdm(total=len(files), leave=True, position=device_num) as pbar:
+            # Process in chunks for memory management
+            for i in range(0, len(files), batch_size):
+                batch = files[i:i + batch_size]
                 futures = [
                     executor.submit(process_file_embedding_wrapper, file_info)
                     for file_info in batch
                 ]
                 for future in concurrent.futures.as_completed(futures):
                     pbar.update(1)
-            # Clear memory between batches
-            gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
+                # Clear memory between batches
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
 
 
 def run_embedding_extraction(

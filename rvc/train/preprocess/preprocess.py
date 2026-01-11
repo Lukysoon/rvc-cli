@@ -5,12 +5,11 @@ import gc
 from scipy import signal
 from scipy.io import wavfile
 import numpy as np
-import concurrent.futures
+from multiprocessing import Pool, get_context, cpu_count
 from tqdm import tqdm
 import json
 from distutils.util import strtobool
 import librosa
-import multiprocessing
 import noisereduce as nr
 
 now_directory = os.getcwd()
@@ -170,20 +169,43 @@ def save_dataset_duration(file_path, dataset_duration):
         json.dump(data, f, indent=4)
 
 
-def process_audio_wrapper(args):
-    pp, file, cut_preprocess, process_effects, noise_reduction, reduction_strength = (
-        args
-    )
+# Global variables for worker processes
+_worker_pp = None
+_worker_cut_preprocess = None
+_worker_process_effects = None
+_worker_noise_reduction = None
+_worker_reduction_strength = None
+
+
+def _init_worker(sr, exp_dir, per, cut_preprocess, process_effects, noise_reduction, reduction_strength):
+    """Initialize worker process with PreProcess instance."""
+    global _worker_pp, _worker_cut_preprocess, _worker_process_effects
+    global _worker_noise_reduction, _worker_reduction_strength
+    _worker_pp = PreProcess(sr, exp_dir, per)
+    _worker_cut_preprocess = cut_preprocess
+    _worker_process_effects = process_effects
+    _worker_noise_reduction = noise_reduction
+    _worker_reduction_strength = reduction_strength
+
+
+def process_audio_wrapper(file):
+    """Process a single audio file using the worker's PreProcess instance."""
+    global _worker_pp, _worker_cut_preprocess, _worker_process_effects
+    global _worker_noise_reduction, _worker_reduction_strength
     file_path, idx0, sid = file
-    return pp.process_audio(
-        file_path,
-        idx0,
-        sid,
-        cut_preprocess,
-        process_effects,
-        noise_reduction,
-        reduction_strength,
-    )
+    try:
+        result = _worker_pp.process_audio(
+            file_path,
+            idx0,
+            sid,
+            _worker_cut_preprocess,
+            _worker_process_effects,
+            _worker_noise_reduction,
+            _worker_reduction_strength,
+        )
+        return result
+    finally:
+        gc.collect()
 
 
 def preprocess_training_set(
@@ -196,10 +218,15 @@ def preprocess_training_set(
     process_effects: bool,
     noise_reduction: bool,
     reduction_strength: float,
-    batch_size: int = 100,
+    batch_size: int = 50,
 ):
     start_time = time.time()
-    pp = PreProcess(sr, exp_dir, per)
+    # Create directories (PreProcess will be created in workers)
+    gt_wavs_dir = os.path.join(exp_dir, "sliced_audios")
+    wavs16k_dir = os.path.join(exp_dir, "sliced_audios_16k")
+    os.makedirs(gt_wavs_dir, exist_ok=True)
+    os.makedirs(wavs16k_dir, exist_ok=True)
+
     logger.info(f"Starting preprocess with {num_processes} processes...")
 
     files = []
@@ -217,50 +244,33 @@ def preprocess_training_set(
                 f'Speaker ID folder is expected to be integer, got "{os.path.basename(root)}" instead.'
             )
 
-    # logging.info(f"Number of files: {len(files)}")
+    logger.info(f"Found {len(files)} audio files to process")
     audio_length = []
 
-    def chunked(lst, size):
-        for i in range(0, len(lst), size):
-            yield lst[i : i + size]
+    # Use multiprocessing.Pool with maxtasksperchild to prevent memory leaks
+    # Workers are recycled after processing 50 files to free accumulated memory
+    ctx = get_context('spawn')
+    with Pool(
+        processes=num_processes,
+        initializer=_init_worker,
+        initargs=(sr, exp_dir, per, cut_preprocess, process_effects, noise_reduction, reduction_strength),
+        maxtasksperchild=50,
+        context=ctx,
+    ) as pool:
+        with tqdm(total=len(files)) as pbar:
+            # Use imap_unordered for memory efficiency - processes results as they come
+            for result in pool.imap_unordered(process_audio_wrapper, files, chunksize=batch_size):
+                if result is not None:
+                    audio_length.append(result)
+                pbar.update(1)
 
-    with tqdm(total=len(files)) as pbar:
-        for batch in chunked(files, batch_size):
-            with concurrent.futures.ProcessPoolExecutor(
-                max_workers=num_processes
-            ) as executor:
-                futures = [
-                    executor.submit(
-                        process_audio_wrapper,
-                        (
-                            pp,
-                            file,
-                            cut_preprocess,
-                            process_effects,
-                            noise_reduction,
-                            reduction_strength,
-                        ),
-                    )
-                    for file in batch
-                ]
-                for future in concurrent.futures.as_completed(futures):
-                    try:
-                        result = future.result()
-                        if result is not None:
-                            audio_length.append(result)
-                    except Exception as e:
-                        logger.info(f"Error processing file: {e}")
-                    pbar.update(1)
-            # Clear memory between batches
-            gc.collect()
-
-    audio_length = sum(audio_length)
+    total_audio_length = sum(audio_length)
     save_dataset_duration(
-        os.path.join(exp_dir, "model_info.json"), dataset_duration=audio_length
+        os.path.join(exp_dir, "model_info.json"), dataset_duration=total_audio_length
     )
     elapsed_time = time.time() - start_time
     logger.info(
-        f"Preprocess completed in {elapsed_time:.2f} seconds on {format_duration(audio_length)} seconds of audio."
+        f"Preprocess completed in {elapsed_time:.2f} seconds on {format_duration(total_audio_length)} seconds of audio."
     )
 
 
@@ -271,14 +281,14 @@ if __name__ == "__main__":
     percentage = float(sys.argv[4])
     num_processes = sys.argv[5]
     if num_processes.lower() == "none":
-        num_processes = multiprocessing.cpu_count()
+        num_processes = cpu_count()
     else:
         num_processes = int(num_processes)
     cut_preprocess = strtobool(sys.argv[6])
     process_effects = strtobool(sys.argv[7])
     noise_reduction = strtobool(sys.argv[8])
     reduction_strength = float(sys.argv[9])
-    batch_size = int(sys.argv[10]) if len(sys.argv) > 10 else 100
+    batch_size = int(sys.argv[10]) if len(sys.argv) > 10 else 50
 
     preprocess_training_set(
         input_root,

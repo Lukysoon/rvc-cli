@@ -57,6 +57,7 @@ class Slicer:
     def _apply_slice(self, waveform, begin, end):
         """
         Applies a slice to the waveform.
+        Returns a copy to avoid keeping original array in memory.
 
         Args:
             waveform (numpy.ndarray): The waveform to slice.
@@ -66,10 +67,10 @@ class Slicer:
         start_idx = begin * self.hop_size
         if len(waveform.shape) > 1:
             end_idx = min(waveform.shape[1], end * self.hop_size)
-            return waveform[:, start_idx:end_idx]
+            return waveform[:, start_idx:end_idx].copy()
         else:
             end_idx = min(waveform.shape[0], end * self.hop_size)
-            return waveform[start_idx:end_idx]
+            return waveform[start_idx:end_idx].copy()
 
     def slice(self, waveform):
         """

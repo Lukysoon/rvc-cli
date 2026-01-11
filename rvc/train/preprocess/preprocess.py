@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import gc
 from scipy import signal
 from scipy.io import wavfile
 import numpy as np
@@ -195,6 +196,7 @@ def preprocess_training_set(
     process_effects: bool,
     noise_reduction: bool,
     reduction_strength: float,
+    batch_size: int = 100,
 ):
     start_time = time.time()
     pp = PreProcess(sr, exp_dir, per)
@@ -217,27 +219,40 @@ def preprocess_training_set(
 
     # logging.info(f"Number of files: {len(files)}")
     audio_length = []
+
+    def chunked(lst, size):
+        for i in range(0, len(lst), size):
+            yield lst[i : i + size]
+
     with tqdm(total=len(files)) as pbar:
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=num_processes
-        ) as executor:
-            futures = [
-                executor.submit(
-                    process_audio_wrapper,
-                    (
-                        pp,
-                        file,
-                        cut_preprocess,
-                        process_effects,
-                        noise_reduction,
-                        reduction_strength,
-                    ),
-                )
-                for file in files
-            ]
-            for future in concurrent.futures.as_completed(futures):
-                audio_length.append(future.result())
-                pbar.update(1)
+        for batch in chunked(files, batch_size):
+            with concurrent.futures.ProcessPoolExecutor(
+                max_workers=num_processes
+            ) as executor:
+                futures = [
+                    executor.submit(
+                        process_audio_wrapper,
+                        (
+                            pp,
+                            file,
+                            cut_preprocess,
+                            process_effects,
+                            noise_reduction,
+                            reduction_strength,
+                        ),
+                    )
+                    for file in batch
+                ]
+                for future in concurrent.futures.as_completed(futures):
+                    try:
+                        result = future.result()
+                        if result is not None:
+                            audio_length.append(result)
+                    except Exception as e:
+                        logger.info(f"Error processing file: {e}")
+                    pbar.update(1)
+            # Clear memory between batches
+            gc.collect()
 
     audio_length = sum(audio_length)
     save_dataset_duration(
@@ -263,6 +278,7 @@ if __name__ == "__main__":
     process_effects = strtobool(sys.argv[7])
     noise_reduction = strtobool(sys.argv[8])
     reduction_strength = float(sys.argv[9])
+    batch_size = int(sys.argv[10]) if len(sys.argv) > 10 else 100
 
     preprocess_training_set(
         input_root,
@@ -274,4 +290,5 @@ if __name__ == "__main__":
         process_effects,
         noise_reduction,
         reduction_strength,
+        batch_size,
     )

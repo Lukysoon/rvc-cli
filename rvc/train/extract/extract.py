@@ -2,6 +2,7 @@ import os
 import sys
 import glob
 import time
+import gc
 import tqdm
 import torch
 import torchcrepe
@@ -116,9 +117,9 @@ class FeatureInput:
             )
 
     def process_files(
-        self, files, f0_method, hop_length, device_num, device, n_threads
+        self, files, f0_method, hop_length, device_num, device, n_threads, batch_size=100
     ):
-        """Process multiple files."""
+        """Process multiple files in batches to control memory usage."""
         self.device = device
         if f0_method == "rmvpe":
             self.model_rmvpe = RMVPE0Predictor(
@@ -134,17 +135,25 @@ class FeatureInput:
         def process_file_wrapper(file_info):
             self.process_file(file_info, f0_method, hop_length)
 
+        def chunked(lst, size):
+            for i in range(0, len(lst), size):
+                yield lst[i : i + size]
+
         with tqdm.tqdm(total=len(files), leave=True, position=device_num) as pbar:
-            # using multi-threading
-            with concurrent.futures.ThreadPoolExecutor(
-                max_workers=n_threads
-            ) as executor:
-                futures = [
-                    executor.submit(process_file_wrapper, file_info)
-                    for file_info in files
-                ]
-                for future in concurrent.futures.as_completed(futures):
-                    pbar.update(1)
+            for batch in chunked(files, batch_size):
+                with concurrent.futures.ThreadPoolExecutor(
+                    max_workers=n_threads
+                ) as executor:
+                    futures = [
+                        executor.submit(process_file_wrapper, file_info)
+                        for file_info in batch
+                    ]
+                    for future in concurrent.futures.as_completed(futures):
+                        pbar.update(1)
+                # Clear memory between batches
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
 
 
 def run_pitch_extraction(files, devices, f0_method, hop_length, num_processes):
@@ -179,7 +188,7 @@ def run_pitch_extraction(files, devices, f0_method, hop_length, num_processes):
 
 
 def process_file_embedding(
-    files, version, embedder_model, embedder_model_custom, device_num, device, n_threads
+    files, version, embedder_model, embedder_model_custom, device_num, device, n_threads, batch_size=100
 ):
     dtype = torch.float16 if config.is_half and "cuda" in device else torch.float32
     model = load_embedding(embedder_model, embedder_model_custom).to(dtype).to(device)
@@ -200,17 +209,25 @@ def process_file_embedding(
         if not np.isnan(feats).any():
             np.save(out_file_path, feats, allow_pickle=False)
         else:
-            logger.info(f"{file} contains NaN values and will be skipped.")
+            logger.info(f"{file_info[0]} contains NaN values and will be skipped.")
+
+    def chunked(lst, size):
+        for i in range(0, len(lst), size):
+            yield lst[i : i + size]
 
     with tqdm.tqdm(total=len(files), leave=True, position=device_num) as pbar:
-        # using multi-threading
-        with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
-            futures = [
-                executor.submit(process_file_embedding_wrapper, file_info)
-                for file_info in files
-            ]
-            for future in concurrent.futures.as_completed(futures):
-                pbar.update(1)
+        for batch in chunked(files, batch_size):
+            with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
+                futures = [
+                    executor.submit(process_file_embedding_wrapper, file_info)
+                    for file_info in batch
+                ]
+                for future in concurrent.futures.as_completed(futures):
+                    pbar.update(1)
+            # Clear memory between batches
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
 
 def run_embedding_extraction(

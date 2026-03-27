@@ -18,9 +18,20 @@ def run_single_experiment(params, output_dir):
     modules = params.get("modules")
     output_path = os.path.join(output_dir, f"{name}.pth")
 
-    # 1. Load models
+    # 1. Load blend models
     cpt_a = wa.load_checkpoint(model_a)
     cpt_b = wa.load_checkpoint(model_b)
+
+    # 2. Load reference models for diff computation (or fall back to blend models)
+    ref_a = params.get("ref_a")
+    ref_b = params.get("ref_b")
+    if ref_a and ref_b:
+        cpt_ref_a = wa.load_checkpoint(ref_a)
+        cpt_ref_b = wa.load_checkpoint(ref_b)
+        print(f"  Using reference models for diff map")
+    else:
+        cpt_ref_a = cpt_a
+        cpt_ref_b = cpt_b
 
     mode = params.get("mode", "threshold")
 
@@ -29,12 +40,14 @@ def run_single_experiment(params, output_dir):
         seed = params.get("seed")
         print(f"\nCreating random masks (ratio={ratio}, seed={seed})...")
         weights = wa.extract_weights(cpt_a)
-        masks, element_counts = wa.create_random_masks(weights, ratio, seed)
+        masks, element_counts = wa.create_random_masks(weights, ratio, seed, modules)
         threshold = None
     else:
-        # Threshold-based selection (default)
+        # Threshold-based selection using REFERENCE models
+        normalization = params.get("normalization")
         print(f"\nComputing weight differences...")
-        diff_tensors, stats = wa.compute_all_differences(cpt_a, cpt_b, modules)
+        diff_tensors, stats = wa.compute_all_differences(cpt_ref_a, cpt_ref_b, modules, normalization=normalization)
+        
         print(f"Analyzed {len(diff_tensors)} layers")
 
         print(f"\nComputing threshold for ratio={ratio}...")
@@ -42,6 +55,27 @@ def run_single_experiment(params, output_dir):
 
         print(f"\nCreating masks...")
         masks, element_counts = wa.create_copy_masks(diff_tensors, threshold)
+
+    # 3b. Write layers log
+    layers_log_path = os.path.join(output_dir, f"{name}_layers.txt")
+    weights_ref = wa.extract_weights(cpt_ref_a if ref_a else cpt_a)
+    with open(layers_log_path, "w") as f:
+        f.write(f"Experiment: {name}\n")
+        if mode == "random":
+            f.write(f"Mode: random (ratio={ratio}, seed={params.get('seed')})\n")
+        else:
+            f.write(f"Mode: threshold (ratio={ratio}, normalization={params.get('normalization')})\n")
+        layers_with_weights = sum(1 for k, c in element_counts.items() if c > 0)
+        f.write(f"Layers with copied weights: {layers_with_weights} / {len(element_counts)}\n\n")
+        f.write(f"{'Layer':<60} {'Selected':>10} {'Total':>10} {'%':>7}\n")
+        f.write("-" * 90 + "\n")
+        sorted_counts = sorted(element_counts.items(), key=lambda x: x[1], reverse=True)
+        for key, count in sorted_counts:
+            if count > 0:
+                total = weights_ref[key].numel() if key in weights_ref else masks[key].numel()
+                pct = 100 * count / total if total > 0 else 0
+                f.write(f"{key:<60} {count:>10,} {total:>10,} {pct:>6.1f}%\n")
+    print(f"  Layers log: {layers_log_path}")
 
     # 4. Blend weights
     print(f"\nBlending weights (factor={blend_factor})...")
@@ -52,17 +86,21 @@ def run_single_experiment(params, output_dir):
     total_params = sum(w.numel() for w in all_weights.values())
     selected = sum(element_counts.values())
 
+    ref_info = ""
+    if ref_a and ref_b:
+        ref_info = f" [diff map: {os.path.basename(ref_a)} vs {os.path.basename(ref_b)}]"
+
     if mode == "random":
         info = (
             f"Randomly blended {ratio*100:.1f}% of weights "
             f"(factor={blend_factor}, seed={params.get('seed')}) from {os.path.basename(model_a)} "
-            f"into {os.path.basename(model_b)}"
+            f"into {os.path.basename(model_b)}{ref_info}"
         )
     else:
         info = (
             f"Blended {ratio*100:.1f}% most different weights "
             f"(factor={blend_factor}) from {os.path.basename(model_a)} "
-            f"into {os.path.basename(model_b)}"
+            f"into {os.path.basename(model_b)}{ref_info}"
         )
     wa.save_model(result_weights, cpt_b, output_path, info)
 
@@ -119,6 +157,9 @@ def main():
         print(f"[{i+1}/{len(experiments)}] {name}")
         print(f"  model_a: {params['model_a']}")
         print(f"  model_b: {params['model_b']}")
+        if params.get("ref_a") and params.get("ref_b"):
+            print(f"  ref_a: {params['ref_a']}")
+            print(f"  ref_b: {params['ref_b']}")
         print(f"  ratio: {params['ratio']}, blend_factor: {params['blend_factor']}")
         if params.get("mode") == "random":
             print(f"  mode: random, seed: {params.get('seed')}")
@@ -140,10 +181,8 @@ def main():
             pitch = infer_config.get("pitch", 0)
             stats["output_wavs"] = []
             for audio_file in input_audios:
-                model_a_stem = os.path.splitext(os.path.basename(params['model_a']))[0]
-                model_b_stem = os.path.splitext(os.path.basename(params['model_b']))[0]
                 audio_stem = os.path.splitext(os.path.basename(audio_file))[0]
-                output_wav = os.path.join(output_dir, f"{model_a_stem}_{model_b_stem}_{name}_{audio_stem}.wav")
+                output_wav = os.path.join(output_dir, f"{name}_{audio_stem}.wav")
                 print(f"\nRunning inference: {audio_file} -> {output_wav}")
                 run_experiment_inference(stats["output_path"], audio_file, output_wav, pitch)
                 stats["output_wavs"].append(output_wav)

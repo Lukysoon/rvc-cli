@@ -23,13 +23,19 @@ def extract_weights(cpt: dict) -> OrderedDict:
 def compute_all_differences(
     cpt_a: dict,
     cpt_b: dict,
-    modules: List[str] = None
+    modules: List[str] = None,
+    normalization: str = None
 ) -> Tuple[Dict[str, torch.Tensor], Dict[str, dict]]:
     """
     Compute weight differences between two models at the element level.
 
+    Args:
+        normalization: None (absolute diff), "relative" (diff / avg magnitude),
+                       "layer_max" (normalize per layer to 0-1),
+                       "layer_zscore" (z-score per layer, clamped >= 0)
+
     Returns:
-        diff_tensors: Dict {layer_name: abs_diff_tensor}
+        diff_tensors: Dict {layer_name: diff_tensor}
         stats: Dict {layer_name: {"mean", "max", "numel", "shape"}}
     """
     w_a = extract_weights(cpt_a)
@@ -41,7 +47,7 @@ def compute_all_differences(
     for key in w_a.keys():
         # Module filter
         if modules is not None:
-            if not any(m in key for m in modules) and "bias" not in key:
+            if not any(m in key for m in modules):
                 continue
 
         if key not in w_b:
@@ -54,6 +60,19 @@ def compute_all_differences(
             continue
 
         diff = (a - b).abs()
+
+        if normalization == "relative":
+            scale = (a.abs() + b.abs()) / 2 + 1e-8
+            diff = diff / scale
+        elif normalization == "layer_max":
+            max_val = diff.max()
+            if max_val > 0:
+                diff = diff / max_val
+        elif normalization == "layer_zscore":
+            mean = diff.mean()
+            std = diff.std() + 1e-8
+            diff = ((diff - mean) / std).clamp(min=0)
+
         diff_tensors[key] = diff
 
         stats[key] = {
@@ -62,6 +81,9 @@ def compute_all_differences(
             "numel": a.numel(),
             "shape": list(a.shape)
         }
+
+    if normalization:
+        print(f"Normalization: {normalization}")
 
     return diff_tensors, stats
 
@@ -116,7 +138,8 @@ def create_copy_masks(
 def create_random_masks(
     weights: OrderedDict,
     ratio: float = 0.5,
-    seed: int = None
+    seed: int = None,
+    modules: List[str] = None
 ) -> Tuple[Dict[str, torch.Tensor], Dict[str, int]]:
     """
     Create random binary masks for weight blending.
@@ -143,6 +166,8 @@ def create_random_masks(
 
     for key, tensor in weights.items():
         if "enc_q" in key:
+            continue
+        if modules is not None and not any(m in key for m in modules):
             continue
         mask = torch.rand(tensor.shape) < ratio
         masks[key] = mask
